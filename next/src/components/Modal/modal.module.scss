@@ -1,6 +1,6 @@
-@import "../styles/_constants.scss";
-@import "../styles/breakpoints.scss";
-@import "../styles/fonts.scss";
+@import "../../styles/_constants.scss";
+@import "../../styles/breakpoints.scss";
+@import "../../styles/fonts.scss";
 
 .modalContainer {
   z-index: 20;
@@ -38,20 +38,23 @@
     font-size: 24px;
     background-color: white;
     color: $grey-2;
-    right: 0;
-    top: 0;
+    right: 5px;
+    top: 5px;
     z-index: 30;
     width: 2em;
     height: 2em;
     line-height: 1;
     text-align: center;
+
     &:hover {
       cursor: pointer;
     }
+
     @include desktop {
       color: white;
       background-color: $grey-2;
     }
+
     &__icon {
       top: 50%;
       left: 50%;
@@ -60,27 +63,45 @@
       user-select: none;
     }
   }
+
   &__title {
     @include gig-title();
     font-size: 24px;
     margin: 0;
     padding: 24px;
     z-index: 11;
+
+    @include desktop {
+      font-size: 48px;
+    }
+  }
+
+  &__gigTitle {
+    @include gig-title();
+    font-size: 24px;
+    margin: 0;
+    padding: 24px;
+    z-index: 11;
+
     @include desktop {
       font-size: 48px;
       position: absolute;
       bottom: 0;
     }
   }
+
   &__content {
     padding: 24px;
+
     &__flexWrapper {
       display: flex;
       flex-wrap: wrap;
+
       @include phone {
         display: block;
       }
     }
+
     &__buyBtn {
       margin-bottom: 1em;
       margin-left: auto;
@@ -89,29 +110,36 @@
       color: white;
       background-color: $green-1;
       font-weight: bold;
+
       @include phone {
         margin-top: 1em;
       }
+
       &__link {
         padding: 0.75em 1.75em;
         display: inline-block;
       }
     }
+
     &__text {
       font-size: 14px;
       color: white;
       margin: 0;
+
       @include desktop {
         font-size: 16px;
       }
+
       &__description__heading {
         color: white;
         opacity: 0.5;
         margin: 1em 0;
       }
+
       &__description {
         color: white;
         padding-right: 30%;
+
         @include phone {
           padding-right: 0;
         }

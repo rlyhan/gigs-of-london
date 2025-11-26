@@ -1,10 +1,11 @@
 import Layout from "../components/layout";
 import Mapbox from "../components/mapbox";
 import Sidebar from "../components/sidebar";
-import Modal from "../components/modal";
+import EventModal from "../components/Modal/eventModal";
+import SuggestionModal from "@/components/Modal/suggestionModal";
 import { filterEventsByExistingVenue } from "../helpers/filters";
 import { getEventsUrl } from "../helpers/ticketmaster";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface HomePageProps {
   gigs: any;
@@ -12,8 +13,20 @@ interface HomePageProps {
 
 function Home({ gigs }: HomePageProps) {
   const [gigList, setGigList] = useState(gigs);
+  const [showSuggestionModal, setShowSuggestionModal] = useState<boolean>(false);
   const [selectedGigId, setSelectedGigId] = useState<string | null>(null);
   const [modalGigId, setModalGigId] = useState<string | null>(null);
+
+  const selectedGig = gigList.find((gig: any) => gig.id === modalGigId);
+
+  useEffect(() => {
+    console.log('gigs:', gigList)
+    const timer = setTimeout(() => {
+      setShowSuggestionModal(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <Layout home>
@@ -23,17 +36,22 @@ function Home({ gigs }: HomePageProps) {
         setSelectedGigId={setSelectedGigId}
         setModalGigId={setModalGigId}
       />
+
       <Mapbox
         gigs={gigList}
         selectedGigId={selectedGigId}
         setSelectedGigId={setSelectedGigId}
       />
-      {modalGigId && (
-        <Modal
-          gig={gigList.find((gig: any) => gig.id === modalGigId)}
-          setModalGigId={setModalGigId}
-        />
-      )}
+
+      <EventModal
+        gig={selectedGig}
+        setModalGigId={setModalGigId}
+      />
+
+      {/* <SuggestionModal
+        open={showSuggestionModal}
+        onClose={() => setShowSuggestionModal(false)}
+      /> */}
     </Layout>
   );
 }
