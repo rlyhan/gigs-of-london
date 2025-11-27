@@ -7,6 +7,7 @@ import LoadingSpinner from "../loading";
 import { Gig, GigSuggestion } from "@/types";
 import { getGigSuggestions } from "@/helpers/openai";
 import { useGigs } from "@/context/GigContext";
+import DatePicker from "../Elements/datepicker";
 
 interface SuggestionModalProps {
     open: boolean;
@@ -14,7 +15,7 @@ interface SuggestionModalProps {
 }
 
 const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) => {
-    const { gigs } = useGigs();
+    const { gigs, filterDate, setFilterDate } = useGigs();
     const [loading, setLoading] = useState(false);
     const [suggestions, setSuggestions] = useState<GigSuggestion[]>([]);
     const [suggestionPrompt, setSuggestionPrompt] = useState('');
@@ -45,6 +46,7 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
                 What kind of gig do you fancy tonight?
             </h2>
             <div className={styles.modal__content}>
+                <DatePicker date={filterDate} setDate={setFilterDate} />
                 {
                     loading ? (
                         <LoadingSpinner />

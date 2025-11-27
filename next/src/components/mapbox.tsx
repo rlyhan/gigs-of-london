@@ -2,6 +2,8 @@ import React, {
   useEffect,
   useState,
   useRef,
+  Dispatch,
+  SetStateAction
 } from "react";
 import {
   getLatLngFromEvent,
@@ -14,7 +16,11 @@ import { Gig } from "@/types";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_GL_TOKEN || "";
 
-export const Mapbox = () => {
+interface MapboxProps {
+  setModalGig: Dispatch<SetStateAction<Gig | null>>;
+}
+
+export const Mapbox = ({ setModalGig }: MapboxProps) => {
   const { gigs, selectedGig, setSelectedGig } = useGigs();
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -170,6 +176,9 @@ export const Mapbox = () => {
       });
       marker.getElement().addEventListener("mouseleave", () => {
         setSelectedGig(null);
+      });
+      marker.getElement().addEventListener("click", () => {
+        setModalGig(gig);
       });
       return marker;
     }

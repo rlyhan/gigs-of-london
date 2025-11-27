@@ -22,7 +22,7 @@ function Home({ initialGigs }: HomePageProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSuggestionModal(true);
-    }, 3000);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, []);
@@ -41,14 +41,16 @@ function Home({ initialGigs }: HomePageProps) {
                 setModalGig={setModalGig}
               />
 
-              <Mapbox />
+              <Mapbox
+                setModalGig={setModalGig}
+              />
 
               {modalGig && <EventModal
                 gig={modalGig}
                 setModalGig={setModalGig}
               />}
 
-              {gigs?.length && <SuggestionModal
+              {gigs?.length > 0 && <SuggestionModal
                 open={showSuggestionModal}
                 onClose={() => setShowSuggestionModal(false)}
                 setModalGig={setModalGig}
