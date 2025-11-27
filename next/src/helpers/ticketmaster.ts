@@ -1,17 +1,30 @@
 import moment from "moment";
+import { filterImagesByAspectRatio, filterEventsByExistingVenue } from "./filters";
+import { Gig } from "@/types";
 
-import { filterImagesByAspectRatio } from "./filters";
+async function fetchGigs(filterDate: Date): Promise<Gig[]> {
+  try {
+    const res = await fetch(getEventsUrl(filterDate));
+    if (!res.ok) {
+      throw new Error(`Failed to fetch gigs: ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    const gigs: Gig[] = filterEventsByExistingVenue(data._embedded?.events || []);
+    return gigs;
+  } catch (err) {
+    console.error("fetchGigs error:", err);
+    return [];
+  }
+}
 
 const getEventsUrl = (date: Date) => {
   const dayAfter = new Date(date);
   dayAfter.setDate(date.getDate() + 1);
-  return `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${
-    process.env.NEXT_PUBLIC_TICKETMASTER_KEY
-  }&city=London&countryCode=GB&classificationName=Music&startDateTime=${
-    date.toISOString().split("T")[0]
-  }T00:00:00Z&endDateTime=${
-    dayAfter.toISOString().split("T")[0]
-  }T00:00:00Z&size=100&sort=date,asc`;
+  return `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${process.env.NEXT_PUBLIC_TICKETMASTER_KEY
+    }&city=London&countryCode=GB&classificationName=Music&startDateTime=${date.toISOString().split("T")[0]
+    }T00:00:00Z&endDateTime=${dayAfter.toISOString().split("T")[0]
+    }T00:00:00Z&size=100&sort=date,asc`;
 };
 
 const getLatLngFromEvent = (event: any) => {
@@ -47,4 +60,4 @@ ${textContent}
 </div>`;
 };
 
-export { getEventsUrl, getLatLngFromEvent, createEventPopupHTML };
+export { fetchGigs, getEventsUrl, getLatLngFromEvent, createEventPopupHTML };

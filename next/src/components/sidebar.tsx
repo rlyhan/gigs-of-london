@@ -1,15 +1,12 @@
 import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
-
 import styles from "./sidebar.module.scss";
 import utilsStyles from "../styles/utils.module.scss";
+import DatePicker from "./Elements/datepicker";
 import {
-  filterEventsByExistingVenue,
   filterImagesByAspectRatio,
 } from "../helpers/filters";
-import { getEventsUrl } from "../helpers/ticketmaster";
+import { fetchGigs } from "../helpers/ticketmaster";
 
 import Logo from "./logo";
 
@@ -26,7 +23,7 @@ export const Sidebar = ({
   setSelectedGigId,
   setModalGigId,
 }: SidebarProps) => {
-  const [filterDate, setFilterDate] = useState(new Date());
+  const [filterDate, setFilterDate] = useState<Date>(new Date());
 
   const handleMouseClick = (gigId: string) => {
     setModalGigId(gigId);
@@ -41,32 +38,18 @@ export const Sidebar = ({
   };
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch(getEventsUrl(filterDate));
-        const data = await res.json();
-        // Removes events with no venue location
-        const gigs = filterEventsByExistingVenue(data._embedded.events);
-        setGigList(gigs);
-      } catch (error) {
-        console.error("Error:", error);
-      }
+    async function loadGigs() {
+      const gigs = await fetchGigs(filterDate);
+      setGigList(gigs);
     }
-    fetchData();
+    loadGigs();
   }, [filterDate]);
 
   return (
     <div className={styles.sidebar} id="sidebar">
       <div className={styles.sidebar__topContent}>
         <Logo />
-        <div className="datepicker">
-          <div className="datepicker__label">Choose a date</div>
-          <DatePicker
-            minDate={new Date()}
-            selected={filterDate}
-            onChange={(date: Date) => setFilterDate(date)}
-          />
-        </div>
+        <DatePicker date={filterDate} setDate={setFilterDate} />
       </div>
       <div className={styles.sidebar__gigList}>
         {gigs.length ? (
