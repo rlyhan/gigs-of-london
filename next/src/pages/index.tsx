@@ -6,9 +6,10 @@ import SuggestionModal from "@/components/Modal/suggestionModal";
 import { filterEventsByExistingVenue } from "../helpers/filters";
 import { getEventsUrl } from "../helpers/ticketmaster";
 import React, { useState, useEffect } from "react";
+import { Gig } from "@/types";
 
 interface HomePageProps {
-  gigs: any;
+  gigs: Gig[];
 }
 
 function Home({ gigs }: HomePageProps) {
@@ -17,7 +18,7 @@ function Home({ gigs }: HomePageProps) {
   const [selectedGigId, setSelectedGigId] = useState<string | null>(null);
   const [modalGigId, setModalGigId] = useState<string | null>(null);
 
-  const selectedGig = gigList.find((gig: any) => gig.id === modalGigId);
+  const selectedGig = gigList.find((gig: Gig) => gig.id === modalGigId);
 
   useEffect(() => {
     console.log('gigs:', gigList)
@@ -43,15 +44,16 @@ function Home({ gigs }: HomePageProps) {
         setSelectedGigId={setSelectedGigId}
       />
 
-      <EventModal
+      {selectedGig && <EventModal
         gig={selectedGig}
         setModalGigId={setModalGigId}
-      />
+      />}
 
       {gigs.length && <SuggestionModal
         open={showSuggestionModal}
         onClose={() => setShowSuggestionModal(false)}
         gigs={gigs}
+        setModalGigId={setModalGigId}
       />}
     </Layout>
   );

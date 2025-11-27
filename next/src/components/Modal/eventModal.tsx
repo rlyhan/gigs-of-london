@@ -1,5 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react";
 import moment from "moment";
+import { Gig } from "@/types";
 import Modal from './modal';
 import styles from "./modal.module.scss";
 import utilsStyles from "../../styles/utils.module.scss";
@@ -9,7 +10,7 @@ import {
 } from "../../helpers/filters";
 
 interface EventModalProps {
-    gig: any;
+    gig: Gig;
     setModalGigId: Dispatch<SetStateAction<string | null>>;
 }
 

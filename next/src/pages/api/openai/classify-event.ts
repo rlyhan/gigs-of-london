@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
+import { GigSuggestion } from "@/types";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY!,
@@ -42,16 +43,19 @@ Return ONLY a JSON object shaped like:
             temperature: 0,
         });
 
-        // Get the message
         const msg = completion.choices[0].message;
 
-        // NEW: Always try parsed first, fallback to content
-        const parsed =
-            msg.parsed ??
-            (msg.content ? JSON.parse(msg.content) : null);
+        let parsed: { suggestions: GigSuggestion[] } | null = null;
 
-        if (!parsed) {
-            throw new Error("Model returned no JSON.");
+        try {
+            parsed = msg?.content ? JSON.parse(msg.content) : null;
+        } catch (e) {
+            console.error("Failed to parse AI response as JSON:", msg?.content);
+            return res.status(500).json({ error: "AI returned invalid JSON" });
+        }
+
+        if (!parsed || !Array.isArray(parsed.suggestions)) {
+            return res.status(500).json({ error: "AI returned invalid suggestions" });
         }
 
         return res.status(200).json(parsed);
