@@ -17,6 +17,7 @@
     "classnames": "^2.5.1",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
+    "framer-motion": "^12.23.24",
     "mapbox-gl": "^2.15.0",
     "moment": "^2.29.4",
     "next": "13.2.4",

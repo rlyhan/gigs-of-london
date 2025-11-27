@@ -48,10 +48,11 @@ function Home({ gigs }: HomePageProps) {
         setModalGigId={setModalGigId}
       />
 
-      {/* <SuggestionModal
+      {gigs.length && <SuggestionModal
         open={showSuggestionModal}
         onClose={() => setShowSuggestionModal(false)}
-      /> */}
+        gigs={gigs}
+      />}
     </Layout>
   );
 }
