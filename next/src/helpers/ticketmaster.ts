@@ -27,7 +27,7 @@ const getEventsUrl = (date: Date) => {
     }T00:00:00Z&size=100&sort=date,asc`;
 };
 
-const getLatLngFromEvent = (event: any) => {
+const getLatLngFromEvent = (event: Gig) => {
   if (event._embedded?.venues) {
     const location = event._embedded?.venues[0]?.location;
     if (location && !isNaN(location.latitude) && !isNaN(location.longitude)) {
@@ -37,7 +37,7 @@ const getLatLngFromEvent = (event: any) => {
   return null;
 };
 
-const createEventPopupHTML = (event: any) => {
+const createEventPopupHTML = (event: Gig) => {
   const image = `<img
   src=${filterImagesByAspectRatio(event.images, "3_2")[0].url}
 />`;

@@ -1,11 +1,9 @@
 import Head from "next/head";
-import Link from "next/link";
 import styles from "./layout.module.scss";
-import homeStyles from "./home.module.scss";
 
 export const siteTitle = "Gigs of London";
 
-export default function Layout({ children, home }) {
+export default function Layout({ children }) {
   return (
     <div className={styles.container}>
       <Head>
@@ -22,14 +20,7 @@ export default function Layout({ children, home }) {
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <header className={styles.header}></header>
-      <main className={home && homeStyles.containerHome}>{children}</main>
-      {!home && (
-        <div className={styles.backToHome}>
-          <Link href="/">
-            <a>← Back to home</a>
-          </Link>
-        </div>
-      )}
+      <main>{children}</main>
     </div>
   );
 }

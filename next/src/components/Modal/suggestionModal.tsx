@@ -6,15 +6,15 @@ import SuggestionList from "../Lists/suggestionList";
 import LoadingSpinner from "../loading";
 import { Gig, GigSuggestion } from "@/types";
 import { getGigSuggestions } from "@/helpers/openai";
+import { useGigs } from "@/context/GigContext";
 
 interface SuggestionModalProps {
     open: boolean;
-    onClose: () => void;
-    gigs: Gig[];
-    setModalGigId: Dispatch<SetStateAction<string | null>>;
+    onClose: () => void; setModalGig: Dispatch<SetStateAction<Gig | null>>;
 }
 
-const SuggestionModal = ({ open, onClose, gigs, setModalGigId }: SuggestionModalProps) => {
+const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) => {
+    const { gigs } = useGigs();
     const [loading, setLoading] = useState(false);
     const [suggestions, setSuggestions] = useState<GigSuggestion[]>([]);
     const [suggestionPrompt, setSuggestionPrompt] = useState('');
@@ -29,9 +29,10 @@ const SuggestionModal = ({ open, onClose, gigs, setModalGigId }: SuggestionModal
         setLoading(false);
     };
 
-    const handleSuggestionClick = (suggestionId: string) => {
+    const handleSuggestionClick = (suggestion: GigSuggestion) => {
         onClose();
-        setModalGigId(suggestionId);
+        const suggestedGig = gigs.find(gig => gig.id === suggestion.id);
+        if (suggestedGig) setModalGig(suggestedGig);
     }
 
     useEffect(() => {

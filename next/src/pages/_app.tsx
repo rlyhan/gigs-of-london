@@ -3,18 +3,17 @@ import "@/styles/mapbox.scss";
 import "@/styles/datepicker.scss";
 
 import type { AppProps } from "next/app";
+import Layout from "@/components/layout";
+import { GigsProvider } from "@/context/GigContext";
 
 export default function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  const initialGigs = pageProps.initialGigs || [];
+
+  return (
+    <GigsProvider initialGigs={initialGigs}>
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
+    </GigsProvider>
+  );
 }
-
-// export async function getStaticProps() {
-//   const res = await fetch(process.env.API_URL);
-//   const objects = await res.json();
-
-//   return {
-//     props: {
-//       objects,
-//     },
-//   };
-// }

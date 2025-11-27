@@ -6,44 +6,31 @@ import DatePicker from "./Elements/datepicker";
 import {
   filterImagesByAspectRatio,
 } from "../helpers/filters";
-import { fetchGigs } from "../helpers/ticketmaster";
+import { useGigs } from "@/context/GigContext"
+import { Gig } from "@/types";
 
 import Logo from "./logo";
 
 interface SidebarProps {
-  gigs: any[];
-  setGigList: Dispatch<SetStateAction<any[]>>;
-  setSelectedGigId: Dispatch<SetStateAction<string | null>>;
-  setModalGigId: Dispatch<SetStateAction<string | null>>;
+  setModalGig: Dispatch<SetStateAction<Gig | null>>;
 }
 
 export const Sidebar = ({
-  gigs,
-  setGigList,
-  setSelectedGigId,
-  setModalGigId,
+  setModalGig,
 }: SidebarProps) => {
-  const [filterDate, setFilterDate] = useState<Date>(new Date());
+  const { gigs, setSelectedGig, filterDate, setFilterDate } = useGigs();
 
-  const handleMouseClick = (gigId: string) => {
-    setModalGigId(gigId);
+  const handleMouseClick = (gig: Gig) => {
+    setModalGig(gig);
   };
 
-  const handleMouseEnter = (gigId: string) => {
-    setSelectedGigId(gigId);
+  const handleMouseEnter = (gig: Gig) => {
+    setSelectedGig(gig);
   };
 
   const handleMouseLeave = () => {
-    setSelectedGigId(null);
+    setSelectedGig(null);
   };
-
-  useEffect(() => {
-    async function loadGigs() {
-      const gigs = await fetchGigs(filterDate);
-      setGigList(gigs);
-    }
-    loadGigs();
-  }, [filterDate]);
 
   return (
     <div className={styles.sidebar} id="sidebar">
@@ -52,13 +39,13 @@ export const Sidebar = ({
         <DatePicker date={filterDate} setDate={setFilterDate} />
       </div>
       <div className={styles.sidebar__gigList}>
-        {gigs.length ? (
+        {gigs?.length ? (
           gigs.map((gig) => (
             <div
               key={gig.id}
               className={styles.sidebar__gigList__gig}
-              onClick={() => handleMouseClick(gig.id)}
-              onMouseEnter={() => handleMouseEnter(gig.id)}
+              onClick={() => handleMouseClick(gig)}
+              onMouseEnter={() => handleMouseEnter(gig)}
               onMouseLeave={handleMouseLeave}
             >
               <div className={utilsStyles.aspectRatioImage}>

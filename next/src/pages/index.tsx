@@ -1,4 +1,3 @@
-import Layout from "../components/layout";
 import Mapbox from "../components/mapbox";
 import Sidebar from "../components/sidebar";
 import EventModal from "../components/Modal/eventModal";
@@ -7,21 +6,20 @@ import { filterEventsByExistingVenue } from "../helpers/filters";
 import { getEventsUrl } from "../helpers/ticketmaster";
 import React, { useState, useEffect } from "react";
 import { Gig } from "@/types";
+import { useGigs } from "@/context/GigContext";
+import homeStyles from "../components/home.module.scss";
+import LoadingSpinner from "@/components/loading";
 
 interface HomePageProps {
-  gigs: Gig[];
+  initialGigs: Gig[];
 }
 
-function Home({ gigs }: HomePageProps) {
-  const [gigList, setGigList] = useState(gigs);
+function Home({ initialGigs }: HomePageProps) {
+  const { gigs, setGigs, loading } = useGigs();
   const [showSuggestionModal, setShowSuggestionModal] = useState<boolean>(false);
-  const [selectedGigId, setSelectedGigId] = useState<string | null>(null);
-  const [modalGigId, setModalGigId] = useState<string | null>(null);
-
-  const selectedGig = gigList.find((gig: Gig) => gig.id === modalGigId);
+  const [modalGig, setModalGig] = useState<Gig | null>(null);
 
   useEffect(() => {
-    console.log('gigs:', gigList)
     const timer = setTimeout(() => {
       setShowSuggestionModal(true);
     }, 3000);
@@ -29,33 +27,36 @@ function Home({ gigs }: HomePageProps) {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    setGigs(initialGigs);
+  }, [initialGigs]);
+
   return (
-    <Layout home>
-      <Sidebar
-        gigs={gigList}
-        setGigList={setGigList}
-        setSelectedGigId={setSelectedGigId}
-        setModalGigId={setModalGigId}
-      />
+    <div className={homeStyles.containerHome}>
+      {
+        loading ? <LoadingSpinner /> :
+          (
+            <>
+              <Sidebar
+                setModalGig={setModalGig}
+              />
 
-      <Mapbox
-        gigs={gigList}
-        selectedGigId={selectedGigId}
-        setSelectedGigId={setSelectedGigId}
-      />
+              <Mapbox />
 
-      {selectedGig && <EventModal
-        gig={selectedGig}
-        setModalGigId={setModalGigId}
-      />}
+              {modalGig && <EventModal
+                gig={modalGig}
+                setModalGig={setModalGig}
+              />}
 
-      {gigs.length && <SuggestionModal
-        open={showSuggestionModal}
-        onClose={() => setShowSuggestionModal(false)}
-        gigs={gigs}
-        setModalGigId={setModalGigId}
-      />}
-    </Layout>
+              {gigs?.length && <SuggestionModal
+                open={showSuggestionModal}
+                onClose={() => setShowSuggestionModal(false)}
+                setModalGig={setModalGig}
+              />}
+            </>
+          )
+      }
+    </div>
   );
 }
 

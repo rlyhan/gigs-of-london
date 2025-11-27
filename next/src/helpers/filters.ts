@@ -1,9 +1,9 @@
 import moment from "moment";
-
+import { Gig } from "@/types";
 import { getLatLngFromEvent } from "./ticketmaster";
 
-const filterEventsByAttractionId = (events: any[]) => {
-  const distinctEvents: any[] = [];
+const filterEventsByAttractionId = (events: Gig[]) => {
+  const distinctEvents: Gig[] = [];
   const distinctAttractionIds = new Set();
   events.forEach((event, index) => {
     if (
@@ -20,7 +20,7 @@ const filterEventsByAttractionId = (events: any[]) => {
   return distinctEvents;
 };
 
-const filterEventsByDate = (events: any[], date: Date) => {
+const filterEventsByDate = (events: Gig[], date: Date) => {
   return events.filter(
     (event) =>
       moment(event.dates.start.dateTime).format("YYYY-MM-DD") ===
@@ -28,7 +28,7 @@ const filterEventsByDate = (events: any[], date: Date) => {
   );
 };
 
-const filterEventsByExistingVenue = (events: any[]) => {
+const filterEventsByExistingVenue = (events: Gig[]) => {
   return events.filter((event) => getLatLngFromEvent(event) !== null);
 };
 

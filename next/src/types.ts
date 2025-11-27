@@ -13,6 +13,10 @@ export interface Gig {
       name: string;
       [key: string]: any;
     }>
+    attractions: Array<{
+      id: string;
+      [key: string]: any;
+    }>
   };
   dates: {
     start: {

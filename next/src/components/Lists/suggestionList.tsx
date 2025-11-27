@@ -1,10 +1,10 @@
-import { GigSuggestion } from "@/types";
+import { Gig, GigSuggestion } from "@/types";
 import styles from "./list.module.scss";
 
 interface SuggestionListProps {
     suggestionPrompt: string;
     suggestions: GigSuggestion[];
-    handleSuggestionClick: (suggestionId: string) => void;
+    handleSuggestionClick: (suggestion: GigSuggestion) => void;
 }
 
 const SuggestionList = ({ suggestionPrompt, suggestions, handleSuggestionClick }: SuggestionListProps) => {
@@ -15,7 +15,7 @@ const SuggestionList = ({ suggestionPrompt, suggestions, handleSuggestionClick }
                 <div className={styles.suggestion} key={suggestion.id}>
                     <h3>{suggestion.name}</h3>
                     <p>{suggestion.reason}</p>
-                    <button onClick={() => handleSuggestionClick(suggestion.id)}>Go to gig</button>
+                    <button onClick={() => handleSuggestionClick(suggestion)}>Go to gig</button>
                 </div>
             ))}
         </div>

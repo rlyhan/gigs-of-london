@@ -11,11 +11,11 @@ import {
 
 interface EventModalProps {
     gig: Gig;
-    setModalGigId: Dispatch<SetStateAction<string | null>>;
+    setModalGig: Dispatch<SetStateAction<Gig | null>>;
 }
 
-const EventModal = ({ gig, setModalGigId }: EventModalProps) => {
-    const onClose = () => setModalGigId(null);
+const EventModal = ({ gig, setModalGig }: EventModalProps) => {
+    const onClose = () => setModalGig(null);
     if (!gig) return null;
 
     return (

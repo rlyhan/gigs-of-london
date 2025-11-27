@@ -2,8 +2,6 @@ import React, {
   useEffect,
   useState,
   useRef,
-  Dispatch,
-  SetStateAction,
 } from "react";
 import {
   getLatLngFromEvent,
@@ -11,25 +9,19 @@ import {
 } from "../helpers/ticketmaster";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { useGigs } from "@/context/GigContext";
+import { Gig } from "@/types";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_GL_TOKEN || "";
 
-interface MapboxProps {
-  gigs: any[];
-  selectedGigId: string | null;
-  setSelectedGigId: Dispatch<SetStateAction<string | null>>;
-}
+export const Mapbox = () => {
+  const { gigs, selectedGig, setSelectedGig } = useGigs();
+  const mapContainer = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-export const Mapbox = ({
-  gigs,
-  selectedGigId,
-  setSelectedGigId,
-}: MapboxProps) => {
-  const mapContainer = useRef(null);
   let hoveredPolygonId: React.MutableRefObject<null> | null = useRef(null);
-  const [map, setMap] = useState(null);
-  const [markers, setMarkers] = useState<any[]>([]);
-  const [currentMarker, setCurrentMarker] = useState(null);
+  const [currentMarker, setCurrentMarker] = useState<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
     const mapboxMap = new mapboxgl.Map({
@@ -46,7 +38,7 @@ export const Mapbox = ({
       mapContainer.current.style.height = `calc(100vh - ${
         // @ts-ignore
         document.getElementById("sidebar").offsetHeight
-      }px)`;
+        }px)`;
     }
 
     mapboxMap.on("load", () => {
@@ -107,8 +99,7 @@ export const Mapbox = ({
       setupMarkers(gigs);
     });
 
-    // @ts-ignore
-    setMap(mapboxMap);
+    mapRef.current = mapboxMap
 
     window.addEventListener("resize", () => {
       if (mapContainer.current) {
@@ -117,7 +108,7 @@ export const Mapbox = ({
           mapContainer.current.style.height = `calc(100vh - ${
             // @ts-ignore
             document.getElementById("sidebar").offsetHeight
-          }px)`;
+            }px)`;
         } else {
           // @ts-ignore
           mapContainer.current.style.height = "100vh";
@@ -126,6 +117,7 @@ export const Mapbox = ({
     });
 
     return () => {
+      markersRef.current.forEach(marker => marker.remove());
       mapboxMap.remove();
     };
   }, []);
@@ -135,35 +127,33 @@ export const Mapbox = ({
     if (gigs) setupMarkers(gigs);
   }, [gigs]);
 
-  // When markers are updated, add them to map
-  useEffect(() => {
-    if (map) {
-      markers.forEach((marker) => {
-        // @ts-ignore
-        marker.addTo(map);
-      });
-    }
-  }, [markers, map]);
-
   // Clear current markers
   // Create new markers corresponding to gig location
-  const setupMarkers = (gigs: any[]) => {
+  const setupMarkers = (gigs: Gig[]) => {
+    if (!mapRef.current) return;
+
     clearMarkers();
-    if (map) {
-      // TODO: Identify differences between previous markers/gigs array and current? To avoid removing and adding already existing markers
-      const markerList: any[] = [];
-      gigs.forEach((gig) => {
-        markerList.push(createMarker(gig));
-      });
-      setMarkers(markerList);
-    }
+
+    const markerList: mapboxgl.Marker[] = [];
+
+    gigs.forEach((gig) => {
+      const marker = createMarker(gig);
+      if (marker) markerList.push(marker);
+    });
+
+    // Update the ref, not state
+    markersRef.current = markerList;
+
+    // Add new markers to map
+    markersRef.current.forEach((marker) => marker.addTo(mapRef.current!));
   };
 
   const clearMarkers = () => {
-    markers.forEach((marker) => marker.remove());
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
   };
 
-  const createMarker = (gig: any) => {
+  const createMarker = (gig: Gig) => {
     const location = getLatLngFromEvent(gig);
     if (location) {
       // @ts-ignore
@@ -174,23 +164,23 @@ export const Mapbox = ({
       marker.setPopup(popup);
       marker.getElement().setAttribute("data-id", gig.id);
       marker.getElement().addEventListener("mouseenter", () => {
-        if (gig.id !== selectedGigId) {
-          setSelectedGigId(gig.id);
+        if (gig.id !== selectedGig?.id) {
+          setSelectedGig(gig);
         }
       });
       marker.getElement().addEventListener("mouseleave", () => {
-        setSelectedGigId(null);
+        setSelectedGig(null);
       });
       return marker;
     }
     return null;
   };
 
-  // When the selectedGigId changes (by hovering over sidebar gigs
+  // When the selectedGig changes (by hovering over sidebar gigs
   // or hovering over markers)...
   // Remove current marker if it is not null
-  // If selectedGigId is not null,
-  // find marker on map by id that matches selectedGigId
+  // If selectedGig is not null,
+  // find marker on map by id that matches selectedGig
   // and set currentMarker to that marker + show its popup
   useEffect(() => {
     if (currentMarker) {
@@ -198,16 +188,17 @@ export const Mapbox = ({
       currentMarker.togglePopup();
       setCurrentMarker(null);
     }
-    if (selectedGigId) {
-      const gigMarker = markers.find(
-        (marker) => marker._element?.dataset?.id === selectedGigId
+
+    if (selectedGig && markersRef.current.length > 0) {
+      const gigMarker = markersRef.current.find(
+        (marker) => marker.getElement().dataset.id === selectedGig.id
       );
       if (gigMarker && currentMarker !== gigMarker) {
         gigMarker.togglePopup();
         setCurrentMarker(gigMarker);
       }
     }
-  }, [selectedGigId]);
+  }, [selectedGig]);
 
   return (
     <div
