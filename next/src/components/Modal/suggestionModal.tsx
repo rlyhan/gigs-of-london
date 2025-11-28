@@ -36,10 +36,6 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
         if (suggestedGig) setModalGig(suggestedGig);
     }
 
-    useEffect(() => {
-        console.log('suggestions:', suggestions)
-    }, [suggestions])
-
     return (
         <Modal open={open} onClose={onClose}>
             <h2 className={styles.modal__title}>

@@ -28,6 +28,10 @@
         font-size: 18px;
         font-style: italic;
         margin: 0;
+
+        @include phone {
+            font-size: 14px;
+        }
     }
 
 }

@@ -39,6 +39,7 @@ function Home({ initialGigs }: HomePageProps) {
             <>
               <Sidebar
                 setModalGig={setModalGig}
+                setShowSuggestionModal={setShowSuggestionModal}
               />
 
               <Mapbox

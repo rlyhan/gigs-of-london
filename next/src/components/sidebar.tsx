@@ -13,10 +13,12 @@ import Logo from "./logo";
 
 interface SidebarProps {
   setModalGig: Dispatch<SetStateAction<Gig | null>>;
+  setShowSuggestionModal: Dispatch<SetStateAction<boolean>>;
 }
 
 export const Sidebar = ({
   setModalGig,
+  setShowSuggestionModal
 }: SidebarProps) => {
   const { gigs, setSelectedGig, filterDate, setFilterDate } = useGigs();
 
@@ -79,6 +81,9 @@ export const Sidebar = ({
           <p className={styles.sidebar__noGigs}>{`No events on this day :(`}</p>
         )}
       </div>
+      <button className={styles.sidebar__suggestionModalPrompt} onClick={() => setShowSuggestionModal(true)}>
+        <span>I need ideas...</span>
+      </button>
     </div>
   );
 };

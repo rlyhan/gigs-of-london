@@ -74,6 +74,10 @@
     @include desktop {
       font-size: 48px;
     }
+
+    @include phone {
+      padding-right: 50px;
+    }
   }
 
   &__gigTitle {
@@ -91,6 +95,9 @@
   }
 
   &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
     padding: 24px;
 
     &__flexWrapper {

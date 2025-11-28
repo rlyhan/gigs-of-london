@@ -4,10 +4,14 @@
 
 .sidebar {
   width: 100vw;
-  padding: 20px;
-  background-color: $grey-1;
+  background-color: $grey-3;
   position: fixed;
   z-index: 10;
+  padding: 20px;
+
+  @include below-desktop {
+    padding: 0;
+  }
 
   @include desktop {
     width: $sidebar-desktop;
@@ -24,9 +28,17 @@
 .sidebar__topContent {
   display: flex;
   flex-wrap: wrap;
+  gap: 1rem;
   justify-content: space-between;
+  padding-bottom: 20px;
+
+  @include below-desktop {
+    padding: 20px;
+  }
+
   @include desktop {
-    display: block;
+    flex-direction: column;
+    gap: 1.5rem;
     justify-content: revert;
   }
 }
@@ -34,9 +46,12 @@
 .sidebar__gigList {
   display: flex;
   overflow-x: scroll;
+  padding-left: 20px;
+
   @include desktop {
     display: block;
     overflow-x: revert;
+    padding-left: 0;
   }
 }
 
@@ -66,6 +81,7 @@
     bottom: 0;
     padding-left: 10px;
     padding-right: 10px;
+
     &__text {
       @include gig-title();
       margin: 0;
@@ -74,6 +90,7 @@
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
+
       @include desktop {
         font-size: 24px;
       }
@@ -92,5 +109,39 @@
 
   &:hover {
     opacity: 0.5;
+  }
+}
+
+.sidebar__suggestionModalPrompt {
+  bottom: 0;
+  left: 20px;
+  padding: 20px;
+  position: sticky;
+  width: 100%;
+  z-index: 11;
+  background-color: $blue-1;
+  border: 0;
+  border-radius: 2rem;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 1rem 0.5rem;
+
+  @include below-desktop {
+    font-size: 14px;
+    margin: 0.5rem 0 1rem;
+    padding: 0.5rem;
+    width: calc(100% - 40px);
+  }
+
+  span {
+    transition: opacity 0.5s ease;
+  }
+
+  &:hover {
+    span {
+      opacity: 0.5;
+    }
   }
 }
