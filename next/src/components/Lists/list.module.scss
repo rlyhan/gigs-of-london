@@ -10,15 +10,19 @@
 }
 
 .pill {
-    border: 1px solid white;
+    border: 2px solid white;
     border-radius: 2rem;
     color: white;
     cursor: pointer;
     font-weight: 500;
-    padding: 1.5rem 2rem;
+    padding: 1rem 1.5rem;
 
     &:hover {
         background-color: $blue-1;
+    }
+
+    @include phone {
+        font-size: 14px;
     }
 }
 
@@ -66,10 +70,10 @@
         background-color: $blue-1;
         border: 0;
         border-radius: 2rem;
-        color: white;
+        color: $black-2;
         cursor: pointer;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
         padding: 0.5rem 1rem;
         transition: opacity 0.1s ease;
 
