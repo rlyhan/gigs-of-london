@@ -97,7 +97,6 @@
   &__content {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
     padding: 24px;
 
     &__flexWrapper {
@@ -140,7 +139,7 @@
       &__description__heading {
         color: white;
         opacity: 0.5;
-        margin: 1em 0;
+        margin: 0;
       }
 
       &__description {

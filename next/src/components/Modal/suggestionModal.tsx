@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
+import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
 import Modal from './modal';
 import styles from "./modal.module.scss";
 import PillList from "../Lists/pillList";
@@ -8,6 +8,7 @@ import { Gig, GigSuggestion } from "@/types";
 import { getGigSuggestions } from "@/helpers/openai";
 import { useGigs } from "@/context/GigContext";
 import DatePicker from "../Elements/datepicker";
+import { PILL_OPTIONS } from "@/config";
 
 interface SuggestionModalProps {
     open: boolean;
@@ -20,14 +21,8 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
     const [suggestions, setSuggestions] = useState<GigSuggestion[]>([]);
     const [suggestionPrompt, setSuggestionPrompt] = useState('');
 
-    const handlePillClick = async (text: string) => {
-        setLoading(true);
+    const handlePillClick = (text: string) => {
         setSuggestionPrompt(text);
-
-        const suggestions = await getGigSuggestions(text, gigs);
-        setSuggestions(suggestions);
-
-        setLoading(false);
     };
 
     const handleSuggestionClick = (suggestion: GigSuggestion) => {
@@ -36,12 +31,23 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
         if (suggestedGig) setModalGig(suggestedGig);
     }
 
+    const reloadSuggestions = async (suggestionPrompt: string) => {
+        setLoading(true);
+        const suggestions = await getGigSuggestions(suggestionPrompt, gigs);
+        setSuggestions(suggestions);
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        if (suggestionPrompt) reloadSuggestions(suggestionPrompt);
+    }, [suggestionPrompt]);
+
     return (
         <Modal open={open} onClose={onClose}>
             <h2 className={styles.modal__title}>
                 What kind of gig do you fancy tonight?
             </h2>
-            <div className={styles.modal__content}>
+            <div className={styles.modal__content} style={{ gap: "2rem" }}>
                 <DatePicker date={filterDate} setDate={setFilterDate} />
                 {
                     loading ? (
@@ -49,7 +55,7 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
                     ) : (
                         <>
                             {suggestions.length ? (
-                                <SuggestionList suggestionPrompt={suggestionPrompt} suggestions={suggestions} handleSuggestionClick={handleSuggestionClick} />
+                                <SuggestionList suggestionPrompt={suggestionPrompt} suggestions={suggestions} setSuggestionPrompt={setSuggestionPrompt} handleSuggestionClick={handleSuggestionClick} />
                             ) : (
                                 <PillList onSelect={handlePillClick} />
                             )}
