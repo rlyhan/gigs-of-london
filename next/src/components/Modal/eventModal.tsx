@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction } from "react";
 import Image from "next/image";
 import moment from "moment";
-import { Gig } from "@/types";
+import { Gig, GigImage } from "@/types";
 import Modal from './modal';
 import styles from "./modal.module.scss";
 import utilsStyles from "../../styles/utils.module.scss";
@@ -19,17 +19,16 @@ const EventModal = ({ gig, setModalGig }: EventModalProps) => {
     const onClose = () => setModalGig(null);
     if (!gig) return null;
 
-    const modalImageUrl = findLargestImage(
-        filterImagesByAspectRatio(gig.images, "3_2")
-    ).url
-
+    const eventImages: GigImage[] = filterImagesByAspectRatio(gig.images, "3_2") ?? [];
+    const largestImage = findLargestImage(eventImages);
+    const modalImageUrl = largestImage?.url;
 
     return (
         <Modal open={!!gig} onClose={onClose}>
             <div className={utilsStyles.aspectRatioImage}>
                 <p className={styles.modal__gigTitle}>{gig.name}</p>
 
-                <div className={utilsStyles.aspectRatioImage__imgWrapLarge}>
+                {modalImageUrl && <div className={utilsStyles.aspectRatioImage__imgWrapLarge}>
                     <Image
                         className={utilsStyles.aspectRatioImage__img}
                         src={
@@ -39,7 +38,7 @@ const EventModal = ({ gig, setModalGig }: EventModalProps) => {
                         width={800}
                         height={560}
                     />
-                </div>
+                </div>}
             </div>
 
             <div className={styles.modal__content}>

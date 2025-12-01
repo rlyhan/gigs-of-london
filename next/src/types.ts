@@ -1,13 +1,16 @@
+export interface GigImage {
+  url: string;
+  width: number;
+  height: number;
+  ratio?: string;
+  fallback?: boolean;
+}
+
 export interface Gig {
   name: string;
   id: string;
   url: string;
-  images: Array<{
-    url: string;
-    ratio?: string;
-    width?: number;
-    height?: number;
-  }>;
+  images: Array<GigImage>;
   _embedded: {
     venues: Array<{
       name: string;

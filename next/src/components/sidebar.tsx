@@ -6,6 +6,7 @@ import utilsStyles from "../styles/utils.module.scss";
 import DatePicker from "./Elements/datepicker";
 import {
   filterImagesByAspectRatio,
+  findLargestImage,
 } from "../helpers/filters";
 import { useGigs } from "@/context/GigContext"
 import { Gig } from "@/types";
@@ -49,7 +50,9 @@ export const Sidebar = ({
           <>
             {gigs?.length ? (
               gigs.map((gig) => {
-                const landscapeImageUrl = filterImagesByAspectRatio(gig.images, "3_2")[0].url
+                const landscapeImages = filterImagesByAspectRatio(gig.images, "3_2") ?? [];
+                const largestLandscapeThumbnail = findLargestImage(landscapeImages, 650)
+                const largestLandscapeThumbnailUrl = largestLandscapeThumbnail?.url;
                 return (
                   <button
                     key={gig.id}
@@ -69,14 +72,15 @@ export const Sidebar = ({
                         </p>
                       </div>
                       <div className={utilsStyles.aspectRatioImage__imgWrap}>
-                        <Image
+                        {largestLandscapeThumbnailUrl && <Image
                           className={utilsStyles.aspectRatioImage__img}
-                          src={landscapeImageUrl}
+                          src={largestLandscapeThumbnailUrl}
                           alt={gig.name}
-                          width={370}
-                          height={148}
+                          width={430}
+                          height={172}
+                          quality={100}
                           loading="lazy"
-                        />
+                        />}
                       </div>
                     </div>
                     <div className={styles.sidebar__gigList__gig__desc}>

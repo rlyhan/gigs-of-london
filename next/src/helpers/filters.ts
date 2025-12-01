@@ -1,5 +1,5 @@
 import moment from "moment";
-import { Gig } from "@/types";
+import { Gig, GigImage } from "@/types";
 import { getLatLngFromEvent } from "./ticketmaster";
 
 const filterEventsByAttractionId = (events: Gig[]) => {
@@ -32,12 +32,22 @@ const filterEventsByExistingVenue = (events: Gig[]) => {
   return events.filter((event) => getLatLngFromEvent(event) !== null);
 };
 
-const filterImagesByAspectRatio = (images: any[], aspectRatio: string) => {
+const filterImagesByAspectRatio = (images: GigImage[], aspectRatio: string) => {
   return images.filter((image) => image.ratio === aspectRatio) || images;
 };
 
-const findLargestImage = (images: any[]) => {
-  return images.sort((a, b) => b.width - a.width)[0];
+const findLargestImage = (images: GigImage[], maxWidth?: number) => {
+  if (!images || images.length === 0) return null;
+
+  let candidates = maxWidth
+    ? images.filter(img => img.width <= maxWidth)
+    : images;
+
+  if (candidates.length === 0) candidates = images;
+
+  const largest = candidates.sort((a, b) => b.width - a.width)[0];
+
+  return largest || null;
 };
 
 export {
