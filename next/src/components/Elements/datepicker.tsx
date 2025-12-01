@@ -8,10 +8,12 @@ interface DatePickerProps {
 }
 
 const DatePicker = ({ date, setDate }: DatePickerProps) => {
+    const inputId = "datepicker-input";
     return (
         <div className="datepicker">
-            <div className="datepicker__label">Choose a date</div>
+            <label htmlFor={inputId} className="datepicker__label">Choose a date</label>
             <ReactDatePicker
+                id={inputId}
                 minDate={new Date()}
                 selected={date}
                 onChange={(date: Date) => setDate(date)}

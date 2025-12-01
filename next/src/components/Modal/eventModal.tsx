@@ -8,6 +8,7 @@ import {
     filterImagesByAspectRatio,
     findLargestImage,
 } from "../../helpers/filters";
+import { proxiedImageSrc } from "../../helpers/image-proxy";
 
 interface EventModalProps {
     gig: Gig;
@@ -18,6 +19,11 @@ const EventModal = ({ gig, setModalGig }: EventModalProps) => {
     const onClose = () => setModalGig(null);
     if (!gig) return null;
 
+    const modalImageUrl = findLargestImage(
+        filterImagesByAspectRatio(gig.images, "3_2")
+    ).url
+
+
     return (
         <Modal open={!!gig} onClose={onClose}>
             <div className={utilsStyles.aspectRatioImage}>
@@ -27,10 +33,9 @@ const EventModal = ({ gig, setModalGig }: EventModalProps) => {
                     <img
                         className={utilsStyles.aspectRatioImage__img}
                         src={
-                            findLargestImage(
-                                filterImagesByAspectRatio(gig.images, "3_2")
-                            ).url
+                            proxiedImageSrc(modalImageUrl, 800)
                         }
+                        alt={gig.name}
                     />
                 </div>
             </div>

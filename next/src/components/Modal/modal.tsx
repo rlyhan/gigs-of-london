@@ -11,7 +11,7 @@ const Modal = ({ open, onClose, children }: ModalProps) => {
   if (!open) return null;
 
   return (
-    <div className={styles.modalContainer}>
+    <div className={styles.modalContainer} aria-modal="true">
       <div className={styles.modalBackground} onClick={onClose} />
 
       <div className={styles.modal}>
@@ -19,6 +19,7 @@ const Modal = ({ open, onClose, children }: ModalProps) => {
           className={styles.modal__closeBtn}
           onClick={onClose}
           type="button"
+          aria-label="Close"
         >
           <div className={styles.modal__closeBtn__icon}>X</div>
         </button>

@@ -1,17 +1,13 @@
 import moment from "moment";
+import { proxiedImageSrc } from "./image-proxy";
 import { filterImagesByAspectRatio, filterEventsByExistingVenue } from "./filters";
 import { Gig } from "@/types";
 
 async function fetchGigs(filterDate: Date): Promise<Gig[]> {
   try {
-    const res = await fetch(getEventsUrl(filterDate));
-    if (!res.ok) {
-      throw new Error(`Failed to fetch gigs: ${res.statusText}`);
-    }
-
+    const res = await fetch(`/api/gigs?date=${filterDate.toISOString()}`);
     const data = await res.json();
-    const gigs: Gig[] = filterEventsByExistingVenue(data._embedded?.events || []);
-    return gigs;
+    return filterEventsByExistingVenue(data._embedded?.events || []);
   } catch (err) {
     console.error("fetchGigs error:", err);
     return [];
@@ -39,7 +35,8 @@ const getLatLngFromEvent = (event: Gig) => {
 
 const createEventPopupHTML = (event: Gig) => {
   const image = `<img
-  src=${filterImagesByAspectRatio(event.images, "3_2")[0].url}
+  src=${proxiedImageSrc(filterImagesByAspectRatio(event.images, "3_2")[0].url, 240)}
+  alt=${event.name}
 />`;
   const heading = `<h3 style="font-size: 16px; margin: 0 0 .5em;">${event.name}</h3>`;
   const paragraph = (text: string) =>

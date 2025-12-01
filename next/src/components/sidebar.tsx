@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import moment from "moment";
 import styles from "./sidebar.module.scss";
 import utilsStyles from "../styles/utils.module.scss";
@@ -6,6 +6,7 @@ import DatePicker from "./Elements/datepicker";
 import {
   filterImagesByAspectRatio,
 } from "../helpers/filters";
+import { proxiedImageSrc } from "../helpers/image-proxy";
 import { useGigs } from "@/context/GigContext"
 import { Gig } from "@/types";
 
@@ -20,7 +21,7 @@ export const Sidebar = ({
   setModalGig,
   setShowSuggestionModal
 }: SidebarProps) => {
-  const { gigs, setSelectedGig, filterDate, setFilterDate } = useGigs();
+  const { gigs, setSelectedGig, filterDate, setFilterDate, loading } = useGigs();
 
   const handleMouseClick = (gig: Gig) => {
     setModalGig(gig);
@@ -41,47 +42,63 @@ export const Sidebar = ({
         <DatePicker date={filterDate} setDate={setFilterDate} />
       </div>
       <div className={styles.sidebar__gigList}>
-        {gigs?.length ? (
-          gigs.map((gig) => (
-            <div
-              key={gig.id}
-              className={styles.sidebar__gigList__gig}
-              onClick={() => handleMouseClick(gig)}
-              onMouseEnter={() => handleMouseEnter(gig)}
-              onMouseLeave={handleMouseLeave}
-            >
-              <div className={utilsStyles.aspectRatioImage}>
-                <div className={styles.sidebar__gigList__gig__title}>
-                  <p className={styles.sidebar__gigList__gig__title__text}>
-                    {gig.name}
-                  </p>
-                </div>
-                <div className={utilsStyles.aspectRatioImage__imgWrap}>
-                  <img
-                    className={utilsStyles.aspectRatioImage__img}
-                    src={filterImagesByAspectRatio(gig.images, "3_2")[0].url}
-                  />
-                </div>
-              </div>
-              <div className={styles.sidebar__gigList__gig__desc}>
-                <p className={styles.sidebar__gigList__gig__desc__text}>
-                  {gig._embedded?.venues[0]?.name}
-                </p>
-                <p className={styles.sidebar__gigList__gig__desc__text}>
-                  {moment(gig.dates.start.localDate).format("MMMM Do YYYY")}
-                  {gig.dates.start.localTime &&
-                    `, ${moment(gig.dates.start.localTime, "HH:mm:ss").format(
-                      "h:mm A"
-                    )}`}
-                </p>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className={styles.sidebar__noGigs}>{`No events on this day :(`}</p>
-        )}
+        {loading ?
+          (
+            <p className={styles.sidebar__sidebarMessage}>{`No events on this day :(`}</p>
+          ) :
+          <>
+            {gigs?.length ? (
+              gigs.map((gig) => {
+                const landscapeImageUrl = filterImagesByAspectRatio(gig.images, "3_2")[0].url
+                return (
+                  <button
+                    key={gig.id}
+                    className={styles.sidebar__gigList__gig}
+                    onClick={() => handleMouseClick(gig)}
+                    onMouseEnter={() => handleMouseEnter(gig)}
+                    onMouseLeave={handleMouseLeave}
+                    onFocus={() => handleMouseEnter(gig)}
+                    onBlur={handleMouseLeave}
+                    aria-label={`View details for ${gig.name} at ${gig._embedded?.venues[0]?.name} on ${moment(gig.dates.start.localDate).format("MMMM Do YYYY")
+                      }`}
+                  >
+                    <div className={utilsStyles.aspectRatioImage}>
+                      <div className={styles.sidebar__gigList__gig__title}>
+                        <p className={styles.sidebar__gigList__gig__title__text}>
+                          {gig.name}
+                        </p>
+                      </div>
+                      <div className={utilsStyles.aspectRatioImage__imgWrap}>
+                        <img
+                          className={utilsStyles.aspectRatioImage__img}
+                          src={proxiedImageSrc(landscapeImageUrl, 370)}
+                          alt={gig.name}
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                    <div className={styles.sidebar__gigList__gig__desc}>
+                      <p className={styles.sidebar__gigList__gig__desc__text}>
+                        {gig._embedded?.venues[0]?.name}
+                      </p>
+                      <p className={styles.sidebar__gigList__gig__desc__text}>
+                        {moment(gig.dates.start.localDate).format("MMMM Do YYYY")}
+                        {gig.dates.start.localTime &&
+                          `, ${moment(gig.dates.start.localTime, "HH:mm:ss").format(
+                            "h:mm A"
+                          )}`}
+                      </p>
+                    </div>
+                  </button>
+                )
+              })
+            ) : (
+              <p className={styles.sidebar__sidebarMessage}>{`No events on this day :(`}</p>
+            )}
+          </>
+        }
       </div>
-      <button className={styles.sidebar__suggestionModalPrompt} onClick={() => setShowSuggestionModal(true)}>
+      <button className={styles.sidebar__suggestionModalPrompt} onClick={() => setShowSuggestionModal(true)} aria-label="Get gig suggestions">
         <span>I need ideas...</span>
       </button>
     </div>

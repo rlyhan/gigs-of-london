@@ -63,28 +63,17 @@ function Home({ initialGigs }: HomePageProps) {
   );
 }
 
-export async function getServerSideProps() {
-  try {
-    const today = new Date();
-    const res = await fetch(getEventsUrl(today));
-    const data = await res.json();
-    // Removes events with no venue location
-    const gigs = filterEventsByExistingVenue(data._embedded.events);
+export async function getStaticProps() {
+  const today = new Date();
+  const res = await fetch(getEventsUrl(today));
+  const data = await res.json();
 
-    return {
-      props: {
-        gigs,
-      },
-    };
-  } catch (error) {
-    console.error("Error:", error);
+  const gigs = filterEventsByExistingVenue(data._embedded.events);
 
-    return {
-      props: {
-        gigs: [],
-      },
-    };
-  }
+  return {
+    props: { gigs },
+    revalidate: 300, // Rebuild page every 5 minutes
+  };
 }
 
 export default Home;
