@@ -48,59 +48,59 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
     }
 
     mapboxMap.on("load", () => {
-      // Add the main data (boroughs of London)
-      mapboxMap.addSource("boroughs", {
-        type: "geojson",
-        data: "https://skgrange.github.io/www/data/london_boroughs.json",
-        generateId: true,
-      });
+      // // Add the main data (boroughs of London)
+      // mapboxMap.addSource("boroughs", {
+      //   type: "geojson",
+      //   data: "https://skgrange.github.io/www/data/london_boroughs.json",
+      //   generateId: true,
+      // });
 
-      mapboxMap.addLayer({
-        id: "borough-fills",
-        type: "fill",
-        source: "boroughs",
-        layout: {},
-        paint: {
-          "fill-color": "#FFFFFF",
-          "fill-opacity": [
-            "case",
-            ["boolean", ["feature-state", "hover"], false],
-            0.5,
-            0.25,
-          ],
-        },
-      });
+      // mapboxMap.addLayer({
+      //   id: "borough-fills",
+      //   type: "fill",
+      //   source: "boroughs",
+      //   layout: {},
+      //   paint: {
+      //     "fill-color": "#FFFFFF",
+      //     "fill-opacity": [
+      //       "case",
+      //       ["boolean", ["feature-state", "hover"], false],
+      //       0.5,
+      //       0.25,
+      //     ],
+      //   },
+      // });
 
-      mapboxMap.on("mousemove", "borough-fills", (e) => {
-        // @ts-ignore
-        if (e.features.length > 0) {
-          if (hoveredPolygonId !== null) {
-            mapboxMap.setFeatureState(
-              // @ts-ignore
-              { source: "boroughs", id: hoveredPolygonId },
-              { hover: false }
-            );
-          }
-          // @ts-ignore
-          hoveredPolygonId = e.features[0].id;
-          mapboxMap.setFeatureState(
-            // @ts-ignore
-            { source: "boroughs", id: hoveredPolygonId },
-            { hover: true }
-          );
-        }
-      });
+      // mapboxMap.on("mousemove", "borough-fills", (e) => {
+      //   // @ts-ignore
+      //   if (e.features.length > 0) {
+      //     if (hoveredPolygonId !== null) {
+      //       mapboxMap.setFeatureState(
+      //         // @ts-ignore
+      //         { source: "boroughs", id: hoveredPolygonId },
+      //         { hover: false }
+      //       );
+      //     }
+      //     // @ts-ignore
+      //     hoveredPolygonId = e.features[0].id;
+      //     mapboxMap.setFeatureState(
+      //       // @ts-ignore
+      //       { source: "boroughs", id: hoveredPolygonId },
+      //       { hover: true }
+      //     );
+      //   }
+      // });
 
-      mapboxMap.on("mouseleave", "borough-fills", () => {
-        if (hoveredPolygonId !== null) {
-          mapboxMap.setFeatureState(
-            // @ts-ignore
-            { source: "boroughs", id: hoveredPolygonId },
-            { hover: false }
-          );
-        }
-        hoveredPolygonId = null;
-      });
+      // mapboxMap.on("mouseleave", "borough-fills", () => {
+      //   if (hoveredPolygonId !== null) {
+      //     mapboxMap.setFeatureState(
+      //       // @ts-ignore
+      //       { source: "boroughs", id: hoveredPolygonId },
+      //       { hover: false }
+      //     );
+      //   }
+      //   hoveredPolygonId = null;
+      // });
 
       setupMarkers(gigs);
     });
