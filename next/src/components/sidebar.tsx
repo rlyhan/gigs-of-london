@@ -1,4 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
+import Image from "next/image";
 import moment from "moment";
 import styles from "./sidebar.module.scss";
 import utilsStyles from "../styles/utils.module.scss";
@@ -6,7 +7,6 @@ import DatePicker from "./Elements/datepicker";
 import {
   filterImagesByAspectRatio,
 } from "../helpers/filters";
-import { proxiedImageSrc } from "../helpers/image-proxy";
 import { useGigs } from "@/context/GigContext"
 import { Gig } from "@/types";
 
@@ -69,10 +69,12 @@ export const Sidebar = ({
                         </p>
                       </div>
                       <div className={utilsStyles.aspectRatioImage__imgWrap}>
-                        <img
+                        <Image
                           className={utilsStyles.aspectRatioImage__img}
-                          src={proxiedImageSrc(landscapeImageUrl, 370)}
+                          src={landscapeImageUrl}
                           alt={gig.name}
+                          width={370}
+                          height={148}
                           loading="lazy"
                         />
                       </div>

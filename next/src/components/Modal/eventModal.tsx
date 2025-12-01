@@ -1,4 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
+import Image from "next/image";
 import moment from "moment";
 import { Gig } from "@/types";
 import Modal from './modal';
@@ -8,7 +9,6 @@ import {
     filterImagesByAspectRatio,
     findLargestImage,
 } from "../../helpers/filters";
-import { proxiedImageSrc } from "../../helpers/image-proxy";
 
 interface EventModalProps {
     gig: Gig;
@@ -30,12 +30,14 @@ const EventModal = ({ gig, setModalGig }: EventModalProps) => {
                 <p className={styles.modal__gigTitle}>{gig.name}</p>
 
                 <div className={utilsStyles.aspectRatioImage__imgWrapLarge}>
-                    <img
+                    <Image
                         className={utilsStyles.aspectRatioImage__img}
                         src={
-                            proxiedImageSrc(modalImageUrl, 800)
+                            modalImageUrl
                         }
                         alt={gig.name}
+                        width={800}
+                        height={560}
                     />
                 </div>
             </div>

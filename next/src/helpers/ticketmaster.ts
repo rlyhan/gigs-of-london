@@ -1,5 +1,5 @@
+import Image from "next/image";
 import moment from "moment";
-import { proxiedImageSrc } from "./image-proxy";
 import { filterImagesByAspectRatio, filterEventsByExistingVenue } from "./filters";
 import { Gig } from "@/types";
 
@@ -35,7 +35,7 @@ const getLatLngFromEvent = (event: Gig) => {
 
 const createEventPopupHTML = (event: Gig) => {
   const image = `<img
-  src=${proxiedImageSrc(filterImagesByAspectRatio(event.images, "3_2")[0].url, 240)}
+  src=${filterImagesByAspectRatio(event.images, "3_2")[0].url}
   alt=${event.name}
 />`;
   const heading = `<h3 style="font-size: 16px; margin: 0 0 .5em;">${event.name}</h3>`;
