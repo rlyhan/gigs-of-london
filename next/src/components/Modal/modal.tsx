@@ -11,10 +11,15 @@ const Modal = ({ open, onClose, children }: ModalProps) => {
   if (!open) return null;
 
   return (
-    <div className={styles.modalContainer} aria-modal="true">
+    <div className={styles.modalContainer}>
       <div className={styles.modalBackground} onClick={onClose} />
 
-      <div className={styles.modal}>
+      <div
+        className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
         <button
           className={styles.modal__closeBtn}
           onClick={onClose}
