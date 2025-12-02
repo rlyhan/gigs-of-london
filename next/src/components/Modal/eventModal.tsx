@@ -26,7 +26,7 @@ const EventModal = ({ gig, setModalGig }: EventModalProps) => {
     return (
         <Modal open={!!gig} onClose={onClose}>
             <div className={utilsStyles.aspectRatioImage}>
-                <p className={styles.modal__gigTitle}>{gig.name}</p>
+                <h2 className={styles.modal__gigTitle} id="modal-title">{gig.name}</h2>
 
                 {modalImageUrl && <div className={utilsStyles.aspectRatioImage__imgWrapLarge}>
                     <Image

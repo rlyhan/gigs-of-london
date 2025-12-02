@@ -44,7 +44,7 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
 
     return (
         <Modal open={open} onClose={onClose}>
-            <h2 className={styles.modal__title}>
+            <h2 className={styles.modal__title} id="modal-title">
                 What kind of gig do you fancy tonight?
             </h2>
             <div className={styles.modal__content} style={{ gap: "2rem" }}>
