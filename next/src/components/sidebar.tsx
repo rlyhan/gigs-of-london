@@ -40,7 +40,7 @@ export const Sidebar = ({
     <div className={styles.sidebar} id="sidebar">
       <div className={styles.sidebar__topContent}>
         <Logo />
-        <DatePicker date={filterDate} setDate={setFilterDate} />
+        <DatePicker date={filterDate} setDate={setFilterDate} id="sidebar-datepicker" />
       </div>
       <div className={styles.sidebar__gigList}>
         {loading ?

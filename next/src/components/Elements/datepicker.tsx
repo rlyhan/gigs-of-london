@@ -5,15 +5,15 @@ import "react-datepicker/dist/react-datepicker.css";
 interface DatePickerProps {
     date: Date;
     setDate: Dispatch<SetStateAction<Date>>;
+    id: string;
 }
 
-const DatePicker = ({ date, setDate }: DatePickerProps) => {
-    const inputId = "datepicker-input";
+const DatePicker = ({ date, setDate, id }: DatePickerProps) => {
     return (
         <div className="datepicker">
-            <label htmlFor={inputId} className="datepicker__label">Choose a date</label>
+            <label htmlFor={id} className="datepicker__label">Choose a date</label>
             <ReactDatePicker
-                id={inputId}
+                id={id}
                 minDate={new Date()}
                 selected={date}
                 onChange={(date: Date) => setDate(date)}

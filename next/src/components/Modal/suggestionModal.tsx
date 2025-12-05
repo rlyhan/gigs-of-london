@@ -48,7 +48,7 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
                 What kind of gig do you fancy tonight?
             </h2>
             <div className={styles.modal__content} style={{ gap: "2rem" }}>
-                <DatePicker date={filterDate} setDate={setFilterDate} />
+                <DatePicker date={filterDate} setDate={setFilterDate} id="modal-datepicker" />
                 {
                     loading ? (
                         <LoadingSpinner />
