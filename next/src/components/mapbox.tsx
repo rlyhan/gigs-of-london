@@ -1,6 +1,5 @@
 import React, {
   useEffect,
-  useState,
   useRef,
   Dispatch,
   SetStateAction
@@ -9,6 +8,7 @@ import {
   getLatLngFromEvent,
   createEventPopupHTML,
 } from "../helpers/ticketmaster";
+import type { FeatureCollection, Feature, Point } from "geojson";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useGigs } from "@/context/GigContext";
@@ -20,17 +20,42 @@ interface MapboxProps {
   setModalGig: Dispatch<SetStateAction<Gig | null>>;
 }
 
+
 export const Mapbox = ({ setModalGig }: MapboxProps) => {
   const { gigs, selectedGig, setSelectedGig } = useGigs();
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  let hoveredPolygonId: React.MutableRefObject<null> | null = useRef(null);
-  const [currentMarker, setCurrentMarker] = useState<mapboxgl.Marker | null>(null);
+
+  const getGigsGeoJSON = (gigs: Gig[]): FeatureCollection<Point, { id: string; gig: string }> => {
+    const features: Feature<Point, { id: string; gig: string }>[] = gigs
+      .map((gig) => {
+        const location = getLatLngFromEvent(gig);
+        if (!location) return null; // skip gigs with no location
+        return {
+          type: "Feature" as const, // TypeScript needs the literal
+          geometry: {
+            type: "Point" as const,
+            coordinates: location,
+          },
+          properties: {
+            id: gig.id,
+            gig: JSON.stringify(gig),
+          },
+        };
+      })
+      .filter(Boolean) as Feature<Point, { id: string; gig: string }>[]; // remove nulls and typecast
+
+    return {
+      type: "FeatureCollection" as const, // literal string
+      features,
+    };
+  };
 
   useEffect(() => {
-    const mapboxMap = new mapboxgl.Map({
+    if (!mapContainer.current) return;
+
+    const map = new mapboxgl.Map({
       // @ts-ignore
       container: mapContainer.current,
       style: "mapbox://styles/rlyhan/cll2i2nxz00e101qp8wn95xl1",
@@ -39,184 +64,162 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
       trackResize: true,
     });
 
-    if (window.innerWidth < 1024 && document.getElementById("sidebar")) {
-      // @ts-ignore
-      mapContainer.current.style.height = `calc(100vh - ${
-        // @ts-ignore
-        document.getElementById("sidebar").offsetHeight
-        }px)`;
-    }
+    mapRef.current = map;
 
-    mapboxMap.on("load", () => {
-      // // Add the main data (boroughs of London)
-      // mapboxMap.addSource("boroughs", {
-      //   type: "geojson",
-      //   data: "https://skgrange.github.io/www/data/london_boroughs.json",
-      //   generateId: true,
-      // });
-
-      // mapboxMap.addLayer({
-      //   id: "borough-fills",
-      //   type: "fill",
-      //   source: "boroughs",
-      //   layout: {},
-      //   paint: {
-      //     "fill-color": "#FFFFFF",
-      //     "fill-opacity": [
-      //       "case",
-      //       ["boolean", ["feature-state", "hover"], false],
-      //       0.5,
-      //       0.25,
-      //     ],
-      //   },
-      // });
-
-      // mapboxMap.on("mousemove", "borough-fills", (e) => {
-      //   // @ts-ignore
-      //   if (e.features.length > 0) {
-      //     if (hoveredPolygonId !== null) {
-      //       mapboxMap.setFeatureState(
-      //         // @ts-ignore
-      //         { source: "boroughs", id: hoveredPolygonId },
-      //         { hover: false }
-      //       );
-      //     }
-      //     // @ts-ignore
-      //     hoveredPolygonId = e.features[0].id;
-      //     mapboxMap.setFeatureState(
-      //       // @ts-ignore
-      //       { source: "boroughs", id: hoveredPolygonId },
-      //       { hover: true }
-      //     );
-      //   }
-      // });
-
-      // mapboxMap.on("mouseleave", "borough-fills", () => {
-      //   if (hoveredPolygonId !== null) {
-      //     mapboxMap.setFeatureState(
-      //       // @ts-ignore
-      //       { source: "boroughs", id: hoveredPolygonId },
-      //       { hover: false }
-      //     );
-      //   }
-      //   hoveredPolygonId = null;
-      // });
-
-      setupMarkers(gigs);
-    });
-
-    mapRef.current = mapboxMap
-
-    window.addEventListener("resize", () => {
+    const resizeMap = () => {
       if (mapContainer.current) {
-        if (window.innerWidth < 1024 && document.getElementById("sidebar")) {
-          // @ts-ignore
-          mapContainer.current.style.height = `calc(100vh - ${
-            // @ts-ignore
-            document.getElementById("sidebar").offsetHeight
-            }px)`;
+        const sidebar = document.getElementById("sidebar");
+        if (window.innerWidth < 1024 && sidebar) {
+          mapContainer.current.style.height = `calc(100vh - ${sidebar.offsetHeight}px)`;
         } else {
-          // @ts-ignore
           mapContainer.current.style.height = "100vh";
         }
       }
+    };
+
+    resizeMap();
+    window.addEventListener("resize", resizeMap);
+
+    map.on("load", () => {
+      if (!gigs) return;
+
+      // Remove old source/layers if they exist
+      if (map.getSource("gigs")) {
+        ["clusters", "cluster-count", "unclustered-point"].forEach((layer) => {
+          if (map.getLayer(layer)) map.removeLayer(layer);
+        });
+        map.removeSource("gigs");
+      }
+
+      // Add GeoJSON source with clustering
+      map.addSource("gigs", {
+        type: "geojson",
+        data: getGigsGeoJSON(gigs),
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 25,
+      });
+
+      // Cluster circles
+      map.addLayer({
+        id: "clusters",
+        type: "circle",
+        source: "gigs",
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": "#51bbd6",
+          "circle-radius": ["step", ["get", "point_count"], 20, 10, 30, 30, 40],
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#fff",
+        },
+      });
+
+      // Cluster counts
+      map.addLayer({
+        id: "cluster-count",
+        type: "symbol",
+        source: "gigs",
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": "{point_count_abbreviated}",
+          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+          "text-size": 12,
+        },
+      });
+
+      // // Unclustered points
+      map.loadImage("/icons/marker.png", (error, image) => {
+        if (error) throw error;
+
+        if (!map.hasImage("blue-marker")) {
+          map.addImage("blue-marker", image!);
+        }
+
+        map.addLayer({
+          id: "unclustered-point",
+          type: "symbol",
+          source: "gigs",
+          filter: ["!", ["has", "point_count"]],
+          layout: {
+            "icon-image": "blue-marker",
+            "icon-size": 1, // adjust as needed
+            "icon-allow-overlap": true, // allows markers to overlap
+          },
+        });
+      });
+
+
+      // Click event for unclustered points
+      map.on("click", "unclustered-point", (e) => {
+        const feature = e.features![0];
+        const gig: Gig = JSON.parse(feature.properties!.gig);
+
+        // Open modal
+        setModalGig(gig);
+        setSelectedGig(gig);
+      });
+
+      let popup: mapboxgl.Popup | null = null;
+
+      map.on("mouseenter", "unclustered-point", (e) => {
+        const feature = e.features![0];
+        const gig: Gig = JSON.parse(feature.properties!.gig);
+
+        if (gig.id !== selectedGig?.id) setSelectedGig(gig);
+        map.getCanvas().style.cursor = "pointer";
+
+        // Remove previous popup if it exists
+        if (popup) {
+          popup.remove();
+          popup = null;
+        }
+
+        // Add new popup
+        if (feature.geometry.type === "Point") {
+          const coords = feature.geometry.coordinates as [number, number];
+          popup = new mapboxgl.Popup({ offset: 15, className: "event-popup" })
+            .setLngLat(coords)
+            .setHTML(createEventPopupHTML(gig))
+            .addTo(map);
+        }
+      });
+
+      map.on("mouseleave", "unclustered-point", () => {
+        setSelectedGig(null);
+        map.getCanvas().style.cursor = "";
+
+        // Remove popup on mouseleave
+        if (popup) {
+          popup.remove();
+          popup = null;
+        }
+      });
+
+      // Zoom into cluster on click
+      map.on("click", "clusters", (e) => {
+        const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
+        const clusterId = features[0].properties!.cluster_id;
+        (map.getSource("gigs") as any).getClusterExpansionZoom(clusterId, (err: any, zoom: number) => {
+          if (err) return;
+          map.easeTo({
+            center: (features[0].geometry as any).coordinates,
+            zoom,
+          });
+        });
+      });
     });
 
     return () => {
-      markersRef.current.forEach(marker => marker.remove());
-      mapboxMap.remove();
+      window.removeEventListener("resize", resizeMap);
+      map.remove();
     };
-  }, []);
-
-  // When gigs are updated, create new markers
-  useEffect(() => {
-    if (gigs) setupMarkers(gigs);
   }, [gigs]);
-
-  // Clear current markers
-  // Create new markers corresponding to gig location
-  const setupMarkers = (gigs: Gig[]) => {
-    if (!mapRef.current) return;
-
-    clearMarkers();
-
-    const markerList: mapboxgl.Marker[] = [];
-
-    gigs.forEach((gig) => {
-      const marker = createMarker(gig);
-      if (marker) markerList.push(marker);
-    });
-
-    // Update the ref, not state
-    markersRef.current = markerList;
-
-    // Add new markers to map
-    markersRef.current.forEach((marker) => marker.addTo(mapRef.current!));
-  };
-
-  const clearMarkers = () => {
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
-  };
-
-  const createMarker = (gig: Gig) => {
-    const location = getLatLngFromEvent(gig);
-    if (location) {
-      // @ts-ignore
-      const marker = new mapboxgl.Marker().setLngLat(location);
-      const popup = new mapboxgl.Popup({
-        className: "event-popup",
-      }).setHTML(createEventPopupHTML(gig));
-      marker.setPopup(popup);
-      marker.getElement().setAttribute("data-id", gig.id);
-      marker.getElement().addEventListener("mouseenter", () => {
-        if (gig.id !== selectedGig?.id) {
-          setSelectedGig(gig);
-        }
-      });
-      marker.getElement().addEventListener("mouseleave", () => {
-        setSelectedGig(null);
-      });
-      marker.getElement().addEventListener("click", () => {
-        setModalGig(gig);
-      });
-      return marker;
-    }
-    return null;
-  };
-
-  // When the selectedGig changes (by hovering over sidebar gigs
-  // or hovering over markers)...
-  // Remove current marker if it is not null
-  // If selectedGig is not null,
-  // find marker on map by id that matches selectedGig
-  // and set currentMarker to that marker + show its popup
-  useEffect(() => {
-    if (currentMarker) {
-      // @ts-ignore
-      currentMarker.togglePopup();
-      setCurrentMarker(null);
-    }
-
-    if (selectedGig && markersRef.current.length > 0) {
-      const gigMarker = markersRef.current.find(
-        (marker) => marker.getElement().dataset.id === selectedGig.id
-      );
-      if (gigMarker && currentMarker !== gigMarker) {
-        gigMarker.togglePopup();
-        setCurrentMarker(gigMarker);
-      }
-    }
-  }, [selectedGig]);
 
   return (
     <div
       className="mapContainer"
       ref={mapContainer}
-      style={{
-        border: "1px solid #212121",
-        boxSizing: "border-box",
-      }}
+      style={{ border: "1px solid #212121", boxSizing: "border-box" }}
     ></div>
   );
 };
