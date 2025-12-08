@@ -68,15 +68,21 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
     mapRef.current = map;
 
     const resizeMap = () => {
-      if (mapContainer.current) {
-        const sidebar = document.getElementById("sidebar-top");
-        if (window.innerWidth <= 1024 && sidebar) {
+      const sidebar = document.getElementById("sidebar-top");
+
+      requestAnimationFrame(() => {
+        if (window.innerWidth <= 1024 && sidebar && mapContainer.current) {
           mapContainer.current.style.height = `calc(100vh - ${sidebar.offsetHeight}px)`;
-        } else {
+        } else if (mapContainer.current) {
           mapContainer.current.style.height = "100vh";
         }
-      }
-    }
+
+        // make Mapbox read the updated container size
+        requestAnimationFrame(() => {
+          mapRef.current?.resize();
+        });
+      });
+    };
 
     map.on("load", () => {
       if (!gigs) return;
