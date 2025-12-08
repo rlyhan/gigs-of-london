@@ -11,6 +11,7 @@ import {
 import type { FeatureCollection, Feature, Point } from "geojson";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useGigs } from "@/context/GigContext";
 import { Gig } from "@/types";
 
@@ -20,8 +21,8 @@ interface MapboxProps {
   setModalGig: Dispatch<SetStateAction<Gig | null>>;
 }
 
-
 export const Mapbox = ({ setModalGig }: MapboxProps) => {
+  const isPhone = useBreakpoint("phone");
   const { gigs, selectedGig, setSelectedGig } = useGigs();
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -68,20 +69,20 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
 
     const resizeMap = () => {
       if (mapContainer.current) {
-        const sidebar = document.getElementById("sidebar");
-        if (window.innerWidth < 1024 && sidebar) {
+        const sidebar = document.getElementById("sidebar-top");
+        if (window.innerWidth <= 1024 && sidebar) {
           mapContainer.current.style.height = `calc(100vh - ${sidebar.offsetHeight}px)`;
         } else {
           mapContainer.current.style.height = "100vh";
         }
       }
-    };
-
-    resizeMap();
-    window.addEventListener("resize", resizeMap);
+    }
 
     map.on("load", () => {
       if (!gigs) return;
+
+      resizeMap();
+      window.addEventListener("resize", resizeMap);
 
       // Remove old source/layers if they exist
       if (map.getSource("gigs")) {

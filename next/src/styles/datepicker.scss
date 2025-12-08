@@ -6,20 +6,30 @@
   display: flex;
   background: $grey-2;
   max-width: 305px;
-  border-radius: 20px;
+  border-radius: 30px;
   font-size: 16px;
+
+  @include below-desktop {
+    font-size: 14px;
+    height: 48px;
+    max-width: max-content;
+  }
 
   &__label {
     align-items: center;
     color: white;
     display: flex;
     padding: 0.5em 1.5em;
+
+    @include below-desktop {
+      font-size: 12px;
+    }
   }
 
-  @include below-desktop {
-    font-size: 14px;
-    height: 48px;
-    max-width: max-content;
+  .roundIcon {
+    span {
+      background-image: url("../../public/icons/calendar.svg");
+    }
   }
 }
 
@@ -32,8 +42,8 @@
       width: 150px !important;
       height: 100% !important;
       text-align: center !important;
-      border-top-right-radius: 20px;
-      border-bottom-right-radius: 20px;
+      border-top-right-radius: 30px;
+      border-bottom-right-radius: 30px;
 
       @include below-desktop {
         font-size: 14px;
@@ -44,4 +54,8 @@
 
 .react-datepicker-popper {
   z-index: 20 !important;
+}
+
+.hidden-datepicker-input {
+  display: none !important;
 }

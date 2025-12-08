@@ -29,6 +29,18 @@ img {
   display: block;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .logo {
   user-select: none;
   font-size: 32px;
@@ -38,15 +50,36 @@ img {
   letter-spacing: -1px;
   text-transform: uppercase;
   margin: 0;
+
   @include desktop {
     font-size: 54px;
   }
+
   .inline {
     display: inline-block;
   }
+
   .rotatedText {
     font-size: 0.5em;
     transform: rotate(45deg);
     margin-left: 5px;
+  }
+}
+
+.roundIcon {
+  align-items: center;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  height: 48px;
+  width: 48px;
+
+  span {
+    background-repeat: no-repeat;
+    background-position: center;
+    font-size: 16px;
+    height: 100%;
+    width: 100%;
   }
 }

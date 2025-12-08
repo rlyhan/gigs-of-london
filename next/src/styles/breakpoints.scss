@@ -3,9 +3,10 @@ $tablet-max: 1024px;
 $desktop-min: $tablet-max + 1px;
 $max-width: 1440px;
 $sidebar-desktop: 410px;
+$phone-max: $tablet-min - 1px;
 
 @mixin phone() {
-  @media (max-width: $tablet-min) {
+  @media (max-width: $phone-max) {
     @content;
   }
 }

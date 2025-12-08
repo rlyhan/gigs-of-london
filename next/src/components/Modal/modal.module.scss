@@ -23,6 +23,7 @@
   width: 80vw;
   height: 80vh;
   max-width: 800px;
+  max-height: 80vh;
   border-radius: 20px;
   background-color: $grey-3;
   box-shadow: 0px 10px 1px #070807;
@@ -31,6 +32,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   overflow: scroll;
+  height: auto;
 
   &__closeBtn {
     position: absolute;
@@ -76,7 +78,7 @@
     }
 
     @include phone {
-      padding-right: 50px;
+      padding-right: 60px;
     }
   }
 
