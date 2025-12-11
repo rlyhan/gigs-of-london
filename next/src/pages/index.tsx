@@ -1,5 +1,5 @@
 import Mapbox from "../components/mapbox";
-import Sidebar from "../components/sidebar";
+import Sidebar from "../components/Sidebar/sidebar";
 import EventModal from "../components/Modal/eventModal";
 import SuggestionModal from "@/components/Modal/suggestionModal";
 import { filterEventsByExistingVenue } from "../helpers/filters";

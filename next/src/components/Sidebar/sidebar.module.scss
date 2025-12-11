@@ -1,6 +1,6 @@
-@import "../styles/_constants";
-@import "../styles/breakpoints.scss";
-@import "../styles/fonts.scss";
+@import "../../styles/_constants";
+@import "../../styles/breakpoints.scss";
+@import "../../styles/fonts.scss";
 
 .sidebar {
   width: 100vw;
@@ -27,12 +27,12 @@
 
 .sidebar__mobileCollapse {
   span {
-    background-image: url("../../public/icons/chevrons-down.svg");
+    background-image: url("../../../public/icons/chevrons-down.svg");
   }
 
   &.collapsed {
     span {
-      background-image: url("../../public/icons/chevrons-up.svg");
+      background-image: url("../../../public/icons/chevrons-up.svg");
     }
   }
 }
