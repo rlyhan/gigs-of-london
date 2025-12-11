@@ -22,7 +22,7 @@ interface MapboxProps {
 }
 
 export const Mapbox = ({ setModalGig }: MapboxProps) => {
-  const isPhone = useBreakpoint("phone");
+  const isTabletOrPhone = useBreakpoint("tablet");
   const { gigs, selectedGig, setSelectedGig } = useGigs();
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -162,12 +162,15 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         const feature = e.features![0];
         const gig: Gig = JSON.parse(feature.properties!.gig);
 
-        // Open modal
-        setModalGig(gig);
-        setSelectedGig(gig);
+        if (isTabletOrPhone) {
+          // Touch marker to show popup first, let modal be handled by popup CTA
+          setSelectedGig(gig);
+        } else {
+          // Click marker to open modal
+          setSelectedGig(gig);
+          setModalGig(gig);
+        }
       });
-
-      let popup: mapboxgl.Popup | null = null;
 
       map.on("mouseenter", "unclustered-point", (e) => {
         const feature = e.features![0];
@@ -229,13 +232,48 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         // Create and show the popup
         const newPopup = new mapboxgl.Popup({ offset: 15, className: "event-popup" })
           .setLngLat(coords as [number, number]) // Cast to LngLatLike
-          .setHTML(createEventPopupHTML(selectedGig))
+          .setHTML(createEventPopupHTML(selectedGig, isTabletOrPhone))
           .addTo(map);
 
         popupRef.current = newPopup;
+
+        // If mobile/tablet, pan the map to the selected gig (smooth transition)
+        // Ensure the map pans even if the point is clustered
+        if (isTabletOrPhone) {
+          requestAnimationFrame(() => {
+            const ctaButton = document.getElementById(`popup-cta-${selectedGig.id}`);
+
+            if (ctaButton) {
+              ctaButton.onclick = (e) => {
+                e.stopPropagation(); // Prevent map click events from interfering
+                setModalGig(selectedGig);
+
+                // Remove the popup after the modal opens
+                if (popupRef.current) {
+                  popupRef.current.remove();
+                  popupRef.current = null;
+                }
+              };
+            }
+          });
+
+          const verticalOffsetPixels = 90;
+          // Project the geographic coordinates to screen pixels
+          const screenPoint = map.project(coords as [number, number]);
+          // Apply the vertical offset to the screen coordinates (move Y axis up)
+          screenPoint.y -= verticalOffsetPixels;
+          // Unproject the new screen coordinates back to geographic coordinates
+          const offsetCoords = map.unproject(screenPoint);
+
+          map.easeTo({
+            center: offsetCoords,
+            duration: 500,
+            essential: true
+          });
+        }
       }
     }
-  }, [selectedGig, gigs]);
+  }, [selectedGig, gigs, isTabletOrPhone]);
 
   return (
     <div

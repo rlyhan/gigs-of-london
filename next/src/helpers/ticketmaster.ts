@@ -1,4 +1,3 @@
-import Image from "next/image";
 import moment from "moment";
 import { filterImagesByAspectRatio, filterEventsByExistingVenue } from "./filters";
 import { Gig } from "@/types";
@@ -33,22 +32,27 @@ const getLatLngFromEvent = (event: Gig) => {
   return null;
 };
 
-const createEventPopupHTML = (event: Gig) => {
+const createEventPopupHTML = (gig: Gig, isTabletOrPhone: boolean) => {
   const image = `<img
-  src=${filterImagesByAspectRatio(event.images, "3_2")[0].url}
-  alt=${event.name}
+  src=${filterImagesByAspectRatio(gig.images, "3_2")[0].url}
+  alt=${gig.name}
 />`;
-  const heading = `<h3 style="font-size: 16px; margin: 0 0 .5em;">${event.name}</h3>`;
+  const heading = `<h3 style="font-size: 16px; margin: 0 0 .5em;">${gig.name}</h3>`;
   const paragraph = (text: string) =>
     `<p style="font-size: 14px; margin: 0;">${text}</p>`;
+  const mobileTabletCTA = isTabletOrPhone
+    ? `<button id="popup-cta-${gig.id}" class="popup-cta-button" style="width: 100%; display: block; font-size: 12px; margin-top: 8px; background-color: #2da143; color: black; border: 0; border-radius: 2rem; padding: 12px 16px; cursor: pointer;">Get tickets</button>`
+    : '';
+
   const textContent =
     heading +
-    paragraph(event._embedded?.venues[0]?.name) +
+    paragraph(gig._embedded?.venues[0]?.name) +
     paragraph(
-      `${moment(event.dates.start.localDate).format("MMMM Do YYYY")}, ${moment(
-        event.dates.start.localTime,
+      `${moment(gig.dates.start.localDate).format("MMMM Do YYYY")}, ${moment(
+        gig.dates.start.localTime,
         "HH:mm:ss"
-      ).format("h:mm A")}`
+      ).format("h:mm A")}` +
+      mobileTabletCTA
     );
 
   return `${image}

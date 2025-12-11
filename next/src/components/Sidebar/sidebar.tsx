@@ -18,11 +18,14 @@ export const Sidebar = ({
   setShowSuggestionModal
 }: SidebarProps) => {
   const isPhone = useBreakpoint("phone");
+  const isTabletOrPhone = useBreakpoint("tablet");
   const [mobileSidebarVisible, setMobileSidebarVisible] = useState(true);
   const { gigs, setSelectedGig, filterDate, setFilterDate, loading } = useGigs();
 
   const handleMouseClick = (gig: Gig) => {
-    setModalGig(gig);
+    if (isTabletOrPhone) {
+      setModalGig(gig);
+    }
   };
 
   const handleMouseEnter = (gig: Gig) => {
