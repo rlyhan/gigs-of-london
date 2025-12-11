@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 export const breakpoints = {
     phone: "(max-width: 767px)",
-    tablet: "(max-width: 1024px)",
+    tablet: "(min-width: 768px and max-width: 1024px)",
     desktop: "(min-width: 1025px)",
 } as const;
 

@@ -22,7 +22,7 @@ interface MapboxProps {
 }
 
 export const Mapbox = ({ setModalGig }: MapboxProps) => {
-  const isTabletOrPhone = useBreakpoint("tablet");
+  const isTabletOrPhone = useBreakpoint("desktop") === false;
   const { gigs, selectedGig, setSelectedGig } = useGigs();
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);

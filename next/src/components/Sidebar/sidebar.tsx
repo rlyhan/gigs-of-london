@@ -18,13 +18,18 @@ export const Sidebar = ({
   setShowSuggestionModal
 }: SidebarProps) => {
   const isPhone = useBreakpoint("phone");
-  const isTabletOrPhone = useBreakpoint("tablet");
   const [mobileSidebarVisible, setMobileSidebarVisible] = useState(true);
-  const { gigs, setSelectedGig, filterDate, setFilterDate, loading } = useGigs();
+  const { gigs, selectedGig, setSelectedGig, filterDate, setFilterDate, loading } = useGigs();
 
   const handleMouseClick = (gig: Gig) => {
-    if (isTabletOrPhone) {
+    setSelectedGig(gig);
+
+    if (!isPhone) {
       setModalGig(gig);
+    }
+
+    if (isPhone && mobileSidebarVisible) {
+      setMobileSidebarVisible(false);
     }
   };
 
@@ -38,6 +43,10 @@ export const Sidebar = ({
 
   const toggleSidebar = () => {
     setMobileSidebarVisible(prev => !prev);
+
+    if (mobileSidebarVisible === false) {
+      setSelectedGig(null);
+    }
   };
 
   const shouldShowSidebar = (() => {
@@ -47,10 +56,23 @@ export const Sidebar = ({
     return isPhone ? mobileSidebarVisible : true;
   })();
 
+  // Ensure sidebar is visible by default on initial load on mobile
   useEffect(() => {
     if (isPhone === undefined) return;
     setMobileSidebarVisible(prev => prev ?? true);
   }, [isPhone]);
+
+  // Collapse sidebar on mobile when a gig is selected
+  useEffect(() => {
+    if (!isPhone) return;
+    // Check sidebar is currently open
+    if (mobileSidebarVisible) {
+      // If a gig is selected, collapse the sidebar
+      if (selectedGig !== null) {
+        setMobileSidebarVisible(false);
+      }
+    }
+  }, [isPhone, mobileSidebarVisible, selectedGig]);
 
 
   return (
