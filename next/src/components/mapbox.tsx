@@ -26,6 +26,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
   const { gigs, selectedGig, setSelectedGig } = useGigs();
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const popupRef = useRef<mapboxgl.Popup | null>(null)
 
 
   const getGigsGeoJSON = (gigs: Gig[]): FeatureCollection<Point, { id: string; gig: string }> => {
@@ -134,7 +135,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         },
       });
 
-      // // Unclustered points
+      // Unclustered points
       map.loadImage("/icons/marker.png", (error, image) => {
         if (error) throw error;
 
@@ -174,42 +175,27 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
 
         if (gig.id !== selectedGig?.id) setSelectedGig(gig);
         map.getCanvas().style.cursor = "pointer";
-
-        // Remove previous popup if it exists
-        if (popup) {
-          popup.remove();
-          popup = null;
-        }
-
-        // Add new popup
-        if (feature.geometry.type === "Point") {
-          const coords = feature.geometry.coordinates as [number, number];
-          popup = new mapboxgl.Popup({ offset: 15, className: "event-popup" })
-            .setLngLat(coords)
-            .setHTML(createEventPopupHTML(gig))
-            .addTo(map);
-        }
       });
 
       map.on("mouseleave", "unclustered-point", () => {
         setSelectedGig(null);
         map.getCanvas().style.cursor = "";
-
-        // Remove popup on mouseleave
-        if (popup) {
-          popup.remove();
-          popup = null;
-        }
       });
 
       // Zoom into cluster on click
       map.on("click", "clusters", (e) => {
         const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
         const clusterId = features[0].properties!.cluster_id;
-        (map.getSource("gigs") as any).getClusterExpansionZoom(clusterId, (err: any, zoom: number) => {
+
+        (map.getSource("gigs") as mapboxgl.GeoJSONSource).getClusterExpansionZoom(clusterId, (err: any, zoom: number) => {
           if (err) return;
+
+          // 1. Cast features[0].geometry to the GeoJSON Point type.
+          const pointCoords = (features[0].geometry as Point).coordinates;
+
           map.easeTo({
-            center: (features[0].geometry as any).coordinates,
+            // 2. Assert the coordinates (Position/number[]) to a specific two-element tuple.
+            center: pointCoords as [number, number],
             zoom,
           });
         });
@@ -221,6 +207,35 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
       map.remove();
     };
   }, [gigs]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !gigs) return;
+
+    // Cleanup any existing popup
+    if (popupRef.current) {
+      popupRef.current.remove();
+      popupRef.current = null;
+    }
+
+    if (selectedGig) {
+      const coords = getLatLngFromEvent(selectedGig);
+
+      if (coords) {
+        // Check if the coordinates are in the required [lng, lat] format
+        const [lng, lat] = coords;
+        if (lng === undefined || lat === undefined) return;
+
+        // Create and show the popup
+        const newPopup = new mapboxgl.Popup({ offset: 15, className: "event-popup" })
+          .setLngLat(coords as [number, number]) // Cast to LngLatLike
+          .setHTML(createEventPopupHTML(selectedGig))
+          .addTo(map);
+
+        popupRef.current = newPopup;
+      }
+    }
+  }, [selectedGig, gigs]);
 
   return (
     <div
