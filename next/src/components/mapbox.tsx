@@ -244,7 +244,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
             const ctaButton = document.getElementById(`popup-cta-${selectedGig.id}`);
 
             if (ctaButton) {
-              ctaButton.onclick = (e) => {
+              const listener = (e: MouseEvent) => {
                 e.stopPropagation(); // Prevent map click events from interfering
                 setModalGig(selectedGig);
 
@@ -253,7 +253,11 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
                   popupRef.current.remove();
                   popupRef.current = null;
                 }
+                // Clean up the listener after execution to prevent memory leaks
+                ctaButton.removeEventListener('click', listener);
               };
+
+              ctaButton.addEventListener('click', listener);
             }
           });
 
