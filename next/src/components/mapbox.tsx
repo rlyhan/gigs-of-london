@@ -1,6 +1,7 @@
 import React, {
   useEffect,
   useRef,
+  useCallback,
   Dispatch,
   SetStateAction
 } from "react";
@@ -14,6 +15,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useGigs } from "@/context/GigContext";
 import { Gig } from "@/types";
+import _debounce from 'lodash/debounce';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_GL_TOKEN || "";
 
@@ -27,7 +29,15 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const popupRef = useRef<mapboxgl.Popup | null>(null)
-
+  const debouncedSetSelectedGigNull = useCallback(
+    _debounce(() => {
+      setSelectedGig(null);
+      if (mapRef.current) {
+        mapRef.current.getCanvas().style.cursor = "";
+      }
+    }, 100),
+    [setSelectedGig]
+  );
 
   const getGigsGeoJSON = (gigs: Gig[]): FeatureCollection<Point, { id: string; gig: string }> => {
     const features: Feature<Point, { id: string; gig: string }>[] = gigs
@@ -162,6 +172,8 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         const feature = e.features![0];
         const gig: Gig = JSON.parse(feature.properties!.gig);
 
+        if (!gig) return;
+
         if (isTabletOrPhone) {
           // Touch marker to show popup first, let modal be handled by popup CTA
           setSelectedGig(gig);
@@ -181,7 +193,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
       });
 
       map.on("mouseleave", "unclustered-point", () => {
-        setSelectedGig(null);
+        debouncedSetSelectedGigNull();
         map.getCanvas().style.cursor = "";
       });
 
@@ -208,8 +220,9 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
     return () => {
       window.removeEventListener("resize", resizeMap);
       map.remove();
+      debouncedSetSelectedGigNull.cancel();
     };
-  }, [gigs]);
+  }, [gigs, debouncedSetSelectedGigNull]);
 
   // Handle popups for selected gig
   useEffect(() => {
@@ -258,6 +271,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
     }
   }, [selectedGig, gigs, isTabletOrPhone]);
 
+  // Handles popup CTAs
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
