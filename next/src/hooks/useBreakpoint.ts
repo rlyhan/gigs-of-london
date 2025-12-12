@@ -8,22 +8,26 @@ export const breakpoints = {
 
 type BreakpointKeys = keyof typeof breakpoints;
 
-function useMediaQuery(query: string): boolean {
-    const [matches, setMatches] = useState(false);
+function useMediaQuery(query: string): boolean | undefined {
+    const [matches, setMatches] = useState<boolean | undefined>(undefined);
 
     useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
         const media = window.matchMedia(query);
         setMatches(media.matches);
 
         const listener = (event: MediaQueryListEvent) => setMatches(event.matches);
-
         media.addEventListener("change", listener);
+
         return () => media.removeEventListener("change", listener);
     }, [query]);
 
     return matches;
 }
 
-export function useBreakpoint(breakpoint: BreakpointKeys): boolean {
+export function useBreakpoint(breakpoint: BreakpointKeys): boolean | undefined {
     return useMediaQuery(breakpoints[breakpoint]);
 }

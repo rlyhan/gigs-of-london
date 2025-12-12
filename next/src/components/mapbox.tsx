@@ -15,7 +15,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useGigs } from "@/context/GigContext";
 import { Gig } from "@/types";
-import _debounce from 'lodash/debounce';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_GL_TOKEN || "";
 
@@ -24,20 +23,11 @@ interface MapboxProps {
 }
 
 export const Mapbox = ({ setModalGig }: MapboxProps) => {
-  const isTabletOrPhone = useBreakpoint("desktop") === false;
+  const isDesktop = useBreakpoint("desktop");
   const { gigs, selectedGig, setSelectedGig } = useGigs();
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const popupRef = useRef<mapboxgl.Popup | null>(null)
-  const debouncedSetSelectedGigNull = useCallback(
-    _debounce(() => {
-      setSelectedGig(null);
-      if (mapRef.current) {
-        mapRef.current.getCanvas().style.cursor = "";
-      }
-    }, 100),
-    [setSelectedGig]
-  );
 
   const getGigsGeoJSON = (gigs: Gig[]): FeatureCollection<Point, { id: string; gig: string }> => {
     const features: Feature<Point, { id: string; gig: string }>[] = gigs
@@ -97,6 +87,10 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
 
     map.on("load", () => {
       if (!gigs) return;
+      if (isDesktop === undefined) {
+        return;
+      }
+      const isTabletOrPhone = isDesktop === false;
 
       resizeMap();
       window.addEventListener("resize", resizeMap);
@@ -175,9 +169,11 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         if (!gig) return;
 
         if (isTabletOrPhone) {
+          console.log('Marker clicked on mobile/tablet:', gig);
           // Touch marker to show popup first, let modal be handled by popup CTA
           setSelectedGig(gig);
         } else {
+          console.log('Marker clicked on desktop:', gig);
           // Click marker to open modal
           setSelectedGig(gig);
           setModalGig(gig);
@@ -193,7 +189,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
       });
 
       map.on("mouseleave", "unclustered-point", () => {
-        debouncedSetSelectedGigNull();
+        setSelectedGig(null);
         map.getCanvas().style.cursor = "";
       });
 
@@ -220,12 +216,12 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
     return () => {
       window.removeEventListener("resize", resizeMap);
       map.remove();
-      debouncedSetSelectedGigNull.cancel();
     };
-  }, [gigs, debouncedSetSelectedGigNull]);
+  }, [gigs, isDesktop]);
 
   // Handle popups for selected gig
   useEffect(() => {
+    const isTabletOrPhone = isDesktop === false;
     const map = mapRef.current;
     if (!map || !gigs) return;
 
@@ -269,7 +265,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         }
       }
     }
-  }, [selectedGig, gigs, isTabletOrPhone]);
+  }, [selectedGig, gigs, isDesktop]);
 
   // Handles popup CTAs
   useEffect(() => {
