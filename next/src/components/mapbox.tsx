@@ -211,6 +211,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
     };
   }, [gigs]);
 
+  // Handle popups for selected gig
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !gigs) return;
@@ -237,30 +238,8 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
 
         popupRef.current = newPopup;
 
-        // If mobile/tablet, pan the map to the selected gig (smooth transition)
-        // Ensure the map pans even if the point is clustered
+        // Center map on selected gig with offset for mobile
         if (isTabletOrPhone) {
-          requestAnimationFrame(() => {
-            const ctaButton = document.getElementById(`popup-cta-${selectedGig.id}`);
-
-            if (ctaButton) {
-              const listener = (e: MouseEvent) => {
-                e.stopPropagation(); // Prevent map click events from interfering
-                setModalGig(selectedGig);
-
-                // Remove the popup after the modal opens
-                if (popupRef.current) {
-                  popupRef.current.remove();
-                  popupRef.current = null;
-                }
-                // Clean up the listener after execution to prevent memory leaks
-                ctaButton.removeEventListener('click', listener);
-              };
-
-              ctaButton.addEventListener('click', listener);
-            }
-          });
-
           const verticalOffsetPixels = 90;
           // Project the geographic coordinates to screen pixels
           const screenPoint = map.project(coords as [number, number]);
@@ -278,6 +257,41 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
       }
     }
   }, [selectedGig, gigs, isTabletOrPhone]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Set up the delegation listener once the component mounts
+    const handlePopupClickDelegation = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+
+      // Check if the clicked element is a marker by checking for popup cta ID
+      if (target && target.id.startsWith('popup-cta-')) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const gigId = target.id.replace('popup-cta-', '');
+        const gigToOpen = gigs.find(g => g.id === gigId);
+
+        if (gigToOpen) {
+          setModalGig(gigToOpen);
+
+          // Remove popup when modal opened
+          if (popupRef.current) {
+            popupRef.current.remove();
+            popupRef.current = null;
+          }
+        }
+      }
+    };
+
+    mapContainer.current?.addEventListener('click', handlePopupClickDelegation);
+
+    return () => {
+      mapContainer.current?.removeEventListener('click', handlePopupClickDelegation);
+    };
+  }, [gigs, setModalGig]);
 
   return (
     <div
