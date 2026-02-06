@@ -17,7 +17,7 @@ const SuggestionList = ({
     handleSuggestionClick
 }: SuggestionListProps) => {
     return (
-        <div className={styles.suggestionList}>
+        <ul className={styles.suggestionList}>
             <div className={styles.suggestionList__heading}>
                 <h2>You wanted:</h2>
 
@@ -38,15 +38,15 @@ const SuggestionList = ({
             </div>
 
             {suggestions.map((suggestion) => (
-                <div className={styles.suggestion} key={suggestion.id}>
+                <li className={styles.suggestion} key={suggestion.id}>
                     <h3>{suggestion.name}</h3>
                     <p>{suggestion.reason}</p>
                     <button onClick={() => handleSuggestionClick(suggestion)}>
                         Go to gig
                     </button>
-                </div>
+                </li>
             ))}
-        </div>
+        </ul>
     );
 };
 

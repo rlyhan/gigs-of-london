@@ -54,6 +54,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
     };
   };
 
+  // Initialize map
   useEffect(() => {
     if (!mapContainer.current) return;
 
@@ -180,6 +181,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         }
       });
 
+      // Set selected gig on mouse enter
       map.on("mouseenter", "unclustered-point", (e) => {
         const feature = e.features![0];
         const gig: Gig = JSON.parse(feature.properties!.gig);
@@ -188,6 +190,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         map.getCanvas().style.cursor = "pointer";
       });
 
+      // Unset selected gig on mouse leave
       map.on("mouseleave", "unclustered-point", () => {
         setSelectedGig(null);
         map.getCanvas().style.cursor = "";

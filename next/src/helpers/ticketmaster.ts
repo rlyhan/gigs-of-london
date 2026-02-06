@@ -41,7 +41,7 @@ const createEventPopupHTML = (gig: Gig, isTabletOrPhone: boolean) => {
   const paragraph = (text: string) =>
     `<p style="font-size: 14px; margin: 0;">${text}</p>`;
   const mobileTabletCTA = isTabletOrPhone
-    ? `<button id="popup-cta-${gig.id}" class="popup-cta-button" style="width: 100%; display: block; font-size: 12px; margin-top: 8px; background-color: #2da143; color: black; border: 0; border-radius: 2rem; padding: 12px 16px; cursor: pointer;">Get tickets</button>`
+    ? `<button id="popup-cta-${gig.id}" class="popup-cta-button" style="width: 100%; display: block; font-size: 12px; margin-top: 8px; background-color: #3fb1ce; color: black; border: 0; border-radius: 2rem; padding: 12px 16px; cursor: pointer;">See info</button>`
     : '';
 
   const textContent =
