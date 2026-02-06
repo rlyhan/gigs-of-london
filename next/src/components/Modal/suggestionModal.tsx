@@ -8,7 +8,6 @@ import { Gig, GigSuggestion } from "@/types";
 import { getGigSuggestions } from "@/helpers/openai";
 import { useGigs } from "@/context/GigContext";
 import DatePicker from "../Elements/datepicker";
-import { PILL_OPTIONS } from "@/config";
 
 interface SuggestionModalProps {
     open: boolean;

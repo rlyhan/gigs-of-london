@@ -1,17 +1,6 @@
 import moment from "moment";
-import { filterImagesByAspectRatio, filterEventsByExistingVenue } from "./filters";
+import { filterImagesByAspectRatio } from "./filters";
 import { Gig } from "@/types";
-
-async function fetchGigs(filterDate: Date): Promise<Gig[]> {
-  try {
-    const res = await fetch(`/api/gigs?date=${filterDate.toISOString()}`);
-    const data = await res.json();
-    return filterEventsByExistingVenue(data._embedded?.events || []);
-  } catch (err) {
-    console.error("fetchGigs error:", err);
-    return [];
-  }
-}
 
 const getEventsUrl = (date: Date) => {
   const dayAfter = new Date(date);
@@ -61,4 +50,4 @@ ${textContent}
 </div>`;
 };
 
-export { fetchGigs, getEventsUrl, getLatLngFromEvent, createEventPopupHTML };
+export { getEventsUrl, getLatLngFromEvent, createEventPopupHTML };

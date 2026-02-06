@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from "react";
 import { Gig } from "@/types";
-import { fetchGigs } from "@/helpers/ticketmaster";
+import { fetchGigs } from "@/hooks/ticketmaster";
 
 interface GigsContextType {
     gigs: Gig[];
