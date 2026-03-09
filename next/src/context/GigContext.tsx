@@ -24,7 +24,7 @@ export const GigsProvider = ({
     initialGigs: Gig[];
 }) => {
     const [gigs, setGigs] = useState<Gig[]>(initialGigs);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [selectedGig, setSelectedGig] = useState<Gig | null>(null);
     const [filterDate, setFilterDate] = useState<Date>(new Date());
 
