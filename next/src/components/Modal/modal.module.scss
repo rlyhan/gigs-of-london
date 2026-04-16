@@ -30,7 +30,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  overflow: scroll;
+  overflow: visible;
   height: auto;
 
   @include phone {
@@ -45,8 +45,8 @@
     font-size: 24px;
     background-color: white;
     color: $grey-2;
-    right: 5px;
-    top: 5px;
+    right: -0.5em;
+    top: -0.5em;
     z-index: 30;
     width: 2em;
     height: 2em;
@@ -71,19 +71,65 @@
     }
   }
 
+  &__header {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    margin: 0 auto;
+    max-width: 480px;
+    padding: 24px 0 0;
+    width: 100%;
+
+    @include phone {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: none;
+      padding: 24px 64px 0 20px;
+    }
+  }
+
+  &__headerDate {
+    flex-shrink: 0;
+
+    :global(.datepicker) {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      height: auto;
+      padding: 0.25rem 0.5rem 0.25rem 1rem;
+    }
+
+    :global(.datepicker__label) {
+      border-right: 1px solid rgba(255, 255, 255, 0.18);
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 13px;
+      padding: 0.25rem 0.75rem 0.25rem 0;
+    }
+
+    :global(.react-datepicker-wrapper .react-datepicker__input-container input) {
+      background: transparent;
+      border: 0;
+      color: white;
+      padding: 0.35rem 0.5rem;
+      width: 110px !important;
+    }
+  }
+
   &__title {
     @include gig-title();
-    font-size: 24px;
+    font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+    font-size: 36px;
+    font-weight: normal;
+    letter-spacing: -1px;
+    line-height: 1;
     margin: 0;
-    padding: 24px;
+    text-transform: uppercase;
     z-index: 11;
 
     @include desktop {
-      font-size: 36px;
-    }
-
-    @include phone {
-      padding-right: 60px;
+      font-size: 48px;
     }
   }
 
@@ -102,9 +148,11 @@
   }
 
   &__wrap {
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
     height: 80vh;
+    overflow: auto;
   }
 
   &__content {
