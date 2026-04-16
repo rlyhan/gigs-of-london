@@ -43,11 +43,15 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
 
     return (
         <Modal open={open} onClose={onClose}>
-            <h2 className={styles.modal__title} id="modal-title">
-                What kind of gig do you fancy tonight?
-            </h2>
-            <div className={styles.modal__content} style={{ gap: "2rem", alignItems: "center" }}>
-                <DatePicker date={filterDate} setDate={setFilterDate} id="modal-datepicker" />
+            <div className={styles.modal__header}>
+                <h2 className={styles.modal__title} id="modal-title">
+                    FIND A GIG.
+                </h2>
+                <div className={styles.modal__headerDate}>
+                    <DatePicker date={filterDate} setDate={setFilterDate} id="modal-datepicker" />
+                </div>
+            </div>
+            <div className={styles.modal__content} style={{ gap: "1.25rem", alignItems: "center" }}>
                 {
                     loading ? (
                         <LoadingSpinner />
