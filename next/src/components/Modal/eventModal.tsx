@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import moment from "moment";
 import { Gig, GigImage } from "@/types";
@@ -9,14 +9,60 @@ import {
     filterImagesByAspectRatio,
     findLargestImage,
 } from "../../helpers/filters";
+import { getGigDescription } from "../../helpers/openai";
+import AiSummaryCard from "../AiSummaryCard/aiSummaryCard";
+import { MapPinIcon, CalendarIcon } from "../Icons/icons";
 
 interface EventModalProps {
     gig: Gig;
     setModalGig: Dispatch<SetStateAction<Gig | null>>;
 }
 
+const descriptionCache: Record<string, string> = {};
+
+const FALLBACK_TEXT = "Could not generate details of the event - go to the event page to learn more.";
+
 const EventModal = ({ gig, setModalGig }: EventModalProps) => {
     const onClose = () => setModalGig(null);
+    const [aiDescription, setAiDescription] = useState<string | null>(null);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiFailed, setAiFailed] = useState(false);
+    const fetchAttempts = useRef<Record<string, number>>({});
+
+    useEffect(() => {
+        if (!gig) return;
+
+        // Reset state for new gig
+        setAiDescription(null);
+        setAiLoading(false);
+        setAiFailed(false);
+
+        // Check cache first
+        if (descriptionCache[gig.id]) {
+            setAiDescription(descriptionCache[gig.id]);
+            return;
+        }
+
+        // Allow one retry (max 2 attempts)
+        const attempts = fetchAttempts.current[gig.id] || 0;
+        if (attempts >= 2) {
+            setAiFailed(true);
+            return;
+        }
+        fetchAttempts.current[gig.id] = attempts + 1;
+
+        setAiLoading(true);
+        getGigDescription(gig).then((description) => {
+            if (description) {
+                descriptionCache[gig.id] = description;
+                setAiDescription(description);
+            } else {
+                setAiFailed(true);
+            }
+            setAiLoading(false);
+        });
+    }, [gig]);
+
     if (!gig) return null;
 
     const eventImages: GigImage[] = filterImagesByAspectRatio(gig.images, "3_2") ?? [];
@@ -43,12 +89,23 @@ const EventModal = ({ gig, setModalGig }: EventModalProps) => {
 
             <div className={styles.modal__content}>
                 <div className={styles.modal__content__flexWrapper}>
-                    <p className={styles.modal__content__text}>
-                        {gig._embedded?.venues[0]?.name}
-                        <br />
-                        {moment(gig.dates.start.localDate).format("MMMM Do YYYY")},{" "}
-                        {moment(gig.dates.start.localTime, "HH:mm:ss").format("h:mm A")}
-                    </p>
+                    <div className={styles.modal__content__details}>
+                        {gig._embedded?.venues[0]?.name && (
+                            <div className={styles.modal__content__detailRow}>
+                                <MapPinIcon className={styles.modal__content__detailIcon} />
+                                <span>{gig._embedded.venues[0].name}</span>
+                            </div>
+                        )}
+                        <div className={styles.modal__content__detailRow}>
+                            <CalendarIcon className={styles.modal__content__detailIcon} />
+                            <span>
+                                {moment(gig.dates.start.localDate).format("MMMM Do YYYY")}
+                                {gig.dates.start.localTime && (
+                                    <>{", "}{moment(gig.dates.start.localTime, "HH:mm:ss").format("h:mm A")}</>
+                                )}
+                            </span>
+                        </div>
+                    </div>
 
                     <div className={styles.modal__content__buyBtn}>
                         <a
@@ -56,30 +113,31 @@ const EventModal = ({ gig, setModalGig }: EventModalProps) => {
                             href={gig.url}
                             target="__blank"
                         >
-                            Purchase tickets
+                            Get tickets
                         </a>
                     </div>
                 </div>
 
-                {gig.info && (
-                    <>
-                        <p className={styles.modal__content__text__description__heading}>
-                            About this event
-                        </p>
-                        <p className={styles.modal__content__text__description}>{gig.info}</p>
-                    </>
-                )}
+                <div className={styles.border} />
 
-                {gig.pleaseNote && (
-                    <>
-                        <p className={styles.modal__content__text__description__heading}>
-                            Please note
+                <AiSummaryCard
+                    description={aiDescription}
+                    loading={aiLoading}
+                    failed={aiFailed}
+                    fallbackText={FALLBACK_TEXT}
+                />
+
+                <div style={{ marginTop: "1em" }}>
+                    {gig.info && (
+                        <p className={styles.modal__content__text__secondary}>{gig.info}</p>
+                    )}
+
+                    {gig.pleaseNote && (
+                        <p className={styles.modal__content__text__secondary}>
+                            Please note: {gig.pleaseNote}
                         </p>
-                        <p className={styles.modal__content__text__description}>
-                            {gig.pleaseNote}
-                        </p>
-                    </>
-                )}
+                    )}
+                </div>
             </div>
         </Modal>
     );

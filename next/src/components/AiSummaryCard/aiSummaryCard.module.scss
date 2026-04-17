@@ -1,0 +1,53 @@
+@import "../../styles/_constants.scss";
+
+.aiCard {
+  background: linear-gradient(135deg, rgba(63, 177, 206, 0.08) 0%, rgba(45, 161, 67, 0.08) 100%);
+  border: 1px solid rgba(63, 177, 206, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+
+  &__description {
+    color: white;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  &__attribution {
+    color: white;
+    opacity: 0.4;
+    font-size: 11px;
+    font-style: italic;
+    margin: 1em 0 0;
+  }
+
+  &--loading {
+    overflow: hidden;
+  }
+}
+
+.shimmerLine {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.06) 25%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.06) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  margin-bottom: 10px;
+
+  &:last-child {
+    width: 60%;
+    margin-bottom: 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
