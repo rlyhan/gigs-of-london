@@ -2,6 +2,16 @@ import moment from "moment";
 import { filterImagesByAspectRatio } from "./filters";
 import { Gig } from "@/types";
 
+const preloadImage = (src: string) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = src;
+
+    img.onload = resolve;
+    img.onerror = reject;
+  });
+};
+
 const getEventsUrl = (date: Date) => {
   const dayAfter = new Date(date);
   dayAfter.setDate(date.getDate() + 1);
@@ -21,9 +31,11 @@ const getLatLngFromEvent = (event: Gig) => {
   return null;
 };
 
-const createEventPopupHTML = (gig: Gig, isTabletOrPhone: boolean) => {
+const createEventPopupHTML = async (gig: Gig, isTabletOrPhone: boolean) => {
+  const imageUrl = filterImagesByAspectRatio(gig.images, "3_2")[0].url
+
   const image = `<img
-  src=${filterImagesByAspectRatio(gig.images, "3_2")[0].url}
+  src=${imageUrl}
   alt=${gig.name}
 />`;
   const heading = `<h3 style="font-size: 16px; margin: 0 0 .5em;">${gig.name}</h3>`;
@@ -50,4 +62,4 @@ ${textContent}
 </div>`;
 };
 
-export { getEventsUrl, getLatLngFromEvent, createEventPopupHTML };
+export { preloadImage, getEventsUrl, getLatLngFromEvent, createEventPopupHTML };

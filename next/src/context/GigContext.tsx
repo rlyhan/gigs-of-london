@@ -29,6 +29,7 @@ export const GigsProvider = ({
     const [filterDate, setFilterDate] = useState<Date>(new Date());
 
     const reloadGigs = async () => {
+        setSelectedGig(null)
         setLoading(true);
         const fetched = await fetchGigs(filterDate);
         setGigs(fetched);

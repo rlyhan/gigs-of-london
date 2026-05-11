@@ -1,14 +1,15 @@
 import React, {
   useEffect,
   useRef,
-  useCallback,
   Dispatch,
   SetStateAction
 } from "react";
 import {
+  preloadImage,
   getLatLngFromEvent,
   createEventPopupHTML,
 } from "../helpers/ticketmaster";
+import { filterImagesByAspectRatio } from "../helpers/filters";
 import type { FeatureCollection, Feature, Point } from "geojson";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -24,7 +25,7 @@ interface MapboxProps {
 
 export const Mapbox = ({ setModalGig }: MapboxProps) => {
   const isDesktop = useBreakpoint("desktop");
-  const { gigs, selectedGig, setSelectedGig } = useGigs();
+  const { gigs, selectedGig, setSelectedGig, loading } = useGigs();
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const popupRef = useRef<mapboxgl.Popup | null>(null)
@@ -53,6 +54,10 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
       features,
     };
   };
+
+  useEffect(() => {
+    setSelectedGig(null);
+  }, [gigs]);
 
   // Initialize map
   useEffect(() => {
@@ -228,6 +233,17 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
     const map = mapRef.current;
     if (!map || !gigs) return;
 
+    if (loading) {
+      if (popupRef.current) {
+        popupRef.current.remove();
+        popupRef.current = null;
+      }
+
+      return;
+    }
+
+    let cancelled = false;
+
     // Cleanup any existing popup
     if (popupRef.current) {
       popupRef.current.remove();
@@ -242,13 +258,32 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         const [lng, lat] = coords;
         if (lng === undefined || lat === undefined) return;
 
-        // Create and show the popup
-        const newPopup = new mapboxgl.Popup({ offset: 15, className: "event-popup" })
-          .setLngLat(coords as [number, number]) // Cast to LngLatLike
-          .setHTML(createEventPopupHTML(selectedGig, isTabletOrPhone))
-          .addTo(map);
+        (async () => {
+          const imageUrl = filterImagesByAspectRatio(
+            selectedGig.images,
+            "3_2"
+          )[0].url;
 
-        popupRef.current = newPopup;
+          await preloadImage(imageUrl);
+
+          // STOP if effect became stale
+          if (cancelled) return;
+
+          // Create and show the popup
+          const popupHTML = await createEventPopupHTML(selectedGig, isTabletOrPhone);
+
+          // Double check again before adding
+          if (cancelled) return;
+
+
+          const newPopup = new mapboxgl.Popup({ offset: 15, className: "event-popup" })
+            .setLngLat(coords as [number, number]) // Cast to LngLatLike
+            .setHTML(popupHTML)
+            .addTo(map);
+          popupRef.current = newPopup;
+
+        })()
+
 
         // Center map on selected gig with offset for mobile
         if (isTabletOrPhone) {
@@ -268,6 +303,14 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         }
       }
     }
+    return () => {
+      cancelled = true;
+
+      if (popupRef.current) {
+        popupRef.current.remove();
+        popupRef.current = null;
+      }
+    };
   }, [selectedGig, gigs, isDesktop]);
 
   // Handles popup CTAs
