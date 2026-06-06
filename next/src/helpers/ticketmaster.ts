@@ -31,20 +31,25 @@ const getLatLngFromEvent = (event: Gig) => {
   return null;
 };
 
+const escapeHtml = (str: string) =>
+  str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
 const createEventPopupHTML = async (gig: Gig, isTabletOrPhone: boolean) => {
   const imageUrl = filterImagesByAspectRatio(gig.images, "3_2")[0]?.url;
+  const gigName = escapeHtml(gig.name);
+  const venueName = escapeHtml(gig._embedded?.venues[0]?.name ?? "");
 
-  const image = imageUrl ? `<img src="${imageUrl}" alt="${gig.name}" />` : '';
-  const heading = `<h3 style="font-size: 16px; margin: 0 0 .5em;">${gig.name}</h3>`;
+  const image = imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${gigName}" />` : '';
+  const heading = `<h3 style="font-size: 16px; margin: 0 0 .5em;">${gigName}</h3>`;
   const paragraph = (text: string) =>
     `<p style="font-size: 14px; margin: 0;">${text}</p>`;
   const mobileTabletCTA = isTabletOrPhone
-    ? `<button id="popup-cta-${gig.id}" class="popup-cta-button" style="width: 100%; display: block; font-size: 12px; margin-top: 8px; background-color: #3fb1ce; color: black; border: 0; border-radius: 2rem; padding: 12px 16px; cursor: pointer;">See info</button>`
+    ? `<button id="popup-cta-${escapeHtml(gig.id)}" class="popup-cta-button" style="width: 100%; display: block; font-size: 12px; margin-top: 8px; background-color: #3fb1ce; color: black; border: 0; border-radius: 2rem; padding: 12px 16px; cursor: pointer;">See info</button>`
     : '';
 
   const textContent =
     heading +
-    paragraph(gig._embedded?.venues[0]?.name) +
+    paragraph(venueName) +
     paragraph(
       `${moment(gig.dates.start.localDate).format("MMMM Do YYYY")}, ${moment(
         gig.dates.start.localTime,
