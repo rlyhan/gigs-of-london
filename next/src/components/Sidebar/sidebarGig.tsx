@@ -1,5 +1,6 @@
 import Image from "next/image";
 import moment from "moment";
+import { useState } from "react";
 import { Gig } from "@/types";
 import styles from "./sidebar.module.scss";
 import utilsStyles from "../../styles/utils.module.scss";
@@ -10,12 +11,14 @@ import {
 
 export type SidebarGigProps = {
     gig: Gig;
+    index: number;
     handleMouseClick: (gig: Gig) => void;
     handleMouseEnter: (gig: Gig) => void;
     handleMouseLeave: () => void;
 }
 
-const SidebarGig = ({ gig, handleMouseClick, handleMouseEnter, handleMouseLeave }: SidebarGigProps) => {
+const SidebarGig = ({ gig, index, handleMouseClick, handleMouseEnter, handleMouseLeave }: SidebarGigProps) => {
+    const [imageLoaded, setImageLoaded] = useState(false);
     const landscapeImages = filterImagesByAspectRatio(gig.images, "3_2") ?? [];
     const largestLandscapeThumbnail = findLargestImage(landscapeImages, 650)
     const largestLandscapeThumbnailUrl = largestLandscapeThumbnail?.url;
@@ -37,15 +40,18 @@ const SidebarGig = ({ gig, handleMouseClick, handleMouseEnter, handleMouseLeave 
                         {gig.name}
                     </p>
                 </div>
-                <div className={utilsStyles.aspectRatioImage__imgWrap}>
+                <div className={`${utilsStyles.aspectRatioImage__imgWrap} ${!imageLoaded ? styles.skeleton : ""}`}>
                     {largestLandscapeThumbnailUrl && <Image
                         className={utilsStyles.aspectRatioImage__img}
                         src={largestLandscapeThumbnailUrl}
                         alt={gig.name}
                         width={430}
                         height={172}
-                        quality={100}
-                        loading="lazy"
+                        sizes="(min-width: 1025px) 410px, 280px"
+                        priority={index < 4}
+                        loading={index < 4 ? undefined : "lazy"}
+                        onLoad={() => setImageLoaded(true)}
+                        style={{ opacity: imageLoaded ? 1 : 0, transition: "opacity 0.3s ease" }}
                     />}
                 </div>
             </div>
