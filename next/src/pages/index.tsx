@@ -30,7 +30,6 @@ function Home({ initialGigs }: HomePageProps) {
   }, []);
 
   useEffect(() => {
-    console.log(initialGigs)
     setGigs(initialGigs);
   }, [initialGigs]);
 
