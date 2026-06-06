@@ -148,9 +148,10 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
       // Unclustered points
       map.loadImage("/icons/marker.png", (error, image) => {
         if (error) throw error;
+        if (!image) return;
 
         if (!map.hasImage("blue-marker")) {
-          map.addImage("blue-marker", image!);
+          map.addImage("blue-marker", image);
         }
 
         map.addLayer({
@@ -262,9 +263,9 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
           const imageUrl = filterImagesByAspectRatio(
             selectedGig.images,
             "3_2"
-          )[0].url;
+          )[0]?.url;
 
-          await preloadImage(imageUrl);
+          if (imageUrl) await preloadImage(imageUrl);
 
           // STOP if effect became stale
           if (cancelled) return;

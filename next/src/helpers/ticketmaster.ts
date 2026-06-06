@@ -32,12 +32,9 @@ const getLatLngFromEvent = (event: Gig) => {
 };
 
 const createEventPopupHTML = async (gig: Gig, isTabletOrPhone: boolean) => {
-  const imageUrl = filterImagesByAspectRatio(gig.images, "3_2")[0].url
+  const imageUrl = filterImagesByAspectRatio(gig.images, "3_2")[0]?.url;
 
-  const image = `<img
-  src=${imageUrl}
-  alt=${gig.name}
-/>`;
+  const image = imageUrl ? `<img src="${imageUrl}" alt="${gig.name}" />` : '';
   const heading = `<h3 style="font-size: 16px; margin: 0 0 .5em;">${gig.name}</h3>`;
   const paragraph = (text: string) =>
     `<p style="font-size: 14px; margin: 0;">${text}</p>`;
