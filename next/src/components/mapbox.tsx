@@ -91,6 +91,8 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
       });
     };
 
+    let removed = false;
+
     map.on("load", () => {
       if (!gigs) return;
       if (isDesktop === undefined) {
@@ -145,12 +147,14 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
         },
       });
 
-      // Unclustered points
+      // Unclustered points — loadImage is async so guard against stale map with removed flag
       map.loadImage("/icons/marker.png", (error, image) => {
+        if (removed) return;
         if (error) throw error;
+        if (!image) return;
 
         if (!map.hasImage("blue-marker")) {
-          map.addImage("blue-marker", image!);
+          map.addImage("blue-marker", image);
         }
 
         map.addLayer({
@@ -160,12 +164,11 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
           filter: ["!", ["has", "point_count"]],
           layout: {
             "icon-image": "blue-marker",
-            "icon-size": 1, // adjust as needed
-            "icon-allow-overlap": true, // allows markers to overlap
+            "icon-size": 1,
+            "icon-allow-overlap": true,
           },
         });
       });
-
 
       // Click event for unclustered points
       map.on("click", "unclustered-point", (e) => {
@@ -222,6 +225,7 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
     });
 
     return () => {
+      removed = true;
       window.removeEventListener("resize", resizeMap);
       map.remove();
     };
@@ -262,9 +266,9 @@ export const Mapbox = ({ setModalGig }: MapboxProps) => {
           const imageUrl = filterImagesByAspectRatio(
             selectedGig.images,
             "3_2"
-          )[0].url;
+          )[0]?.url;
 
-          await preloadImage(imageUrl);
+          if (imageUrl) await preloadImage(imageUrl);
 
           // STOP if effect became stale
           if (cancelled) return;

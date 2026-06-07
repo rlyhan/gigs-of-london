@@ -1,7 +1,9 @@
-import Mapbox from "../components/mapbox";
+import dynamic from "next/dynamic";
 import Sidebar from "../components/Sidebar/sidebar";
 import EventModal from "../components/Modal/eventModal";
 import SuggestionModal from "@/components/Modal/suggestionModal";
+
+const Mapbox = dynamic(() => import("../components/mapbox"), { ssr: false });
 import { filterEventsByExistingVenue } from "../helpers/filters";
 import { getEventsUrl } from "../helpers/ticketmaster";
 import React, { useState, useEffect } from "react";
@@ -28,7 +30,6 @@ function Home({ initialGigs }: HomePageProps) {
   }, []);
 
   useEffect(() => {
-    console.log(initialGigs)
     setGigs(initialGigs);
   }, [initialGigs]);
 

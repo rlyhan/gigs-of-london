@@ -102,10 +102,11 @@ export const Sidebar = ({
               ) :
               <>
                 {gigs?.length ? (
-                  gigs.map((gig) => (
+                  gigs.map((gig, index) => (
                     <SidebarGig
                       key={gig.id}
                       gig={gig}
+                      index={index}
                       handleMouseClick={handleMouseClick}
                       handleMouseEnter={handleMouseEnter}
                       handleMouseLeave={handleMouseLeave}
