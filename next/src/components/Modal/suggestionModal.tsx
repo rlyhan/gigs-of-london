@@ -8,6 +8,7 @@ import { Gig, GigSuggestion } from "@/types";
 import { getGigSuggestions } from "@/helpers/openai";
 import { useGigs } from "@/context/GigContext";
 import DatePicker from "../Elements/datepicker";
+import { PILL_OPTIONS } from "@/config";
 
 interface SuggestionModalProps {
     open: boolean;
@@ -19,6 +20,7 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
     const [loading, setLoading] = useState(false);
     const [suggestions, setSuggestions] = useState<GigSuggestion[]>([]);
     const [suggestionPrompt, setSuggestionPrompt] = useState('');
+    const [hasSearched, setHasSearched] = useState(false);
 
     const handlePillClick = (text: string) => {
         setSuggestionPrompt(text);
@@ -34,7 +36,13 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
         setLoading(true);
         const suggestions = await getGigSuggestions(suggestionPrompt, gigs);
         setSuggestions(suggestions);
+        setHasSearched(true);
         setLoading(false);
+    };
+
+    const resetSearch = () => {
+        setHasSearched(false);
+        setSuggestionPrompt('');
     };
 
     useEffect(() => {
@@ -59,6 +67,21 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
                         <>
                             {suggestions.length ? (
                                 <SuggestionList suggestionPrompt={suggestionPrompt} suggestions={suggestions} setSuggestionPrompt={setSuggestionPrompt} handleSuggestionClick={handleSuggestionClick} />
+                            ) : hasSearched ? (
+                                <div className={styles.modal__empty} role="status">
+                                    <span className={styles.modal__empty__emoji} aria-hidden="true">
+                                        {PILL_OPTIONS.find(option => option.label === suggestionPrompt)?.emoji}
+                                    </span>
+                                    <h3 className={styles.modal__empty__title}>
+                                        No gigs match &ldquo;{suggestionPrompt}&rdquo; on this date
+                                    </h3>
+                                    <p className={styles.modal__empty__text}>
+                                        Pick another vibe or change the date.
+                                    </p>
+                                    <button className={styles.modal__empty__button} onClick={resetSearch}>
+                                        Back to options
+                                    </button>
+                                </div>
                             ) : (
                                 <PillList onSelect={handlePillClick} />
                             )}
