@@ -8,7 +8,8 @@ export default function Layout({ children }) {
     <div className={styles.container}>
       <Head>
         <title>{siteTitle}</title>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.ico" sizes="32x32" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <meta name="description" content="Gigs of London" />
         <meta
           property="og:image"
