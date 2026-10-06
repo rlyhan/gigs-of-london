@@ -21,6 +21,7 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
     const [suggestions, setSuggestions] = useState<GigSuggestion[]>([]);
     const [suggestionPrompt, setSuggestionPrompt] = useState('');
     const [hasSearched, setHasSearched] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
     const handlePillClick = (text: string) => {
         setSuggestionPrompt(text);
@@ -34,14 +35,21 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
 
     const reloadSuggestions = async (suggestionPrompt: string) => {
         setLoading(true);
-        const suggestions = await getGigSuggestions(suggestionPrompt, gigs);
-        setSuggestions(suggestions);
+        setHasError(false);
+        try {
+            setSuggestions(await getGigSuggestions(suggestionPrompt, gigs));
+        } catch (err) {
+            console.error("getGigSuggestions error:", err);
+            setSuggestions([]);
+            setHasError(true);
+        }
         setHasSearched(true);
         setLoading(false);
     };
 
     const resetSearch = () => {
         setHasSearched(false);
+        setHasError(false);
         setSuggestionPrompt('');
     };
 
@@ -65,7 +73,24 @@ const SuggestionModal = ({ open, onClose, setModalGig }: SuggestionModalProps) =
                         <LoadingSpinner />
                     ) : (
                         <>
-                            {suggestions.length ? (
+                            {hasError ? (
+                                <div className={styles.modal__empty} role="alert">
+                                    <h3 className={styles.modal__empty__title}>
+                                        Couldn&rsquo;t load suggestions
+                                    </h3>
+                                    <p className={styles.modal__empty__text}>
+                                        Something went wrong finding gigs for &ldquo;{suggestionPrompt}&rdquo;. Try again in a moment.
+                                    </p>
+                                    <div className={styles.modal__empty__actions}>
+                                        <button className={styles.modal__empty__button} onClick={() => reloadSuggestions(suggestionPrompt)}>
+                                            Try again
+                                        </button>
+                                        <button className={styles.modal__empty__buttonSecondary} onClick={resetSearch}>
+                                            Back to options
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : suggestions.length ? (
                                 <SuggestionList suggestionPrompt={suggestionPrompt} suggestions={suggestions} setSuggestionPrompt={setSuggestionPrompt} handleSuggestionClick={handleSuggestionClick} />
                             ) : hasSearched ? (
                                 <div className={styles.modal__empty} role="status">

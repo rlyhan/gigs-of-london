@@ -230,6 +230,34 @@
         outline-offset: 3px;
       }
     }
+
+    &__buttonSecondary {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 2rem;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 0.6rem 1.25rem;
+      transition: border-color 0.1s ease;
+
+      &:hover {
+        border-color: white;
+      }
+
+      &:focus-visible {
+        outline: 2px solid white;
+        outline-offset: 3px;
+      }
+    }
+
+    &__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
   }
 
   &__content {

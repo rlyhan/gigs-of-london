@@ -6,6 +6,7 @@ import moment from "moment";
  * @param text - User description of the desired night
  * @param gigs - Array of gigs to consider
  * @returns Array of GigSuggestion
+ * @throws If the request fails
  */
 export async function getGigSuggestions(text: string, gigs: Gig[]): Promise<GigSuggestion[]> {
     // Only keep gigs with a valid name
@@ -15,27 +16,21 @@ export async function getGigSuggestions(text: string, gigs: Gig[]): Promise<GigS
         return [];
     }
 
-    try {
-        const res = await fetch("/api/openai/classify-event", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                text,
-                gigs: validGigs.map((gig) => ({ name: gig.name, id: gig.id })),
-            }),
-        });
+    const res = await fetch("/api/openai/classify-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            text,
+            gigs: validGigs.map((gig) => ({ name: gig.name, id: gig.id })),
+        }),
+    });
 
-        if (!res.ok) {
-            console.error("Failed to fetch suggestions:", res.statusText);
-            return [];
-        }
-
-        const data = await res.json();
-        return data.suggestions || [];
-    } catch (err) {
-        console.error("getGigSuggestions error:", err);
-        return [];
+    if (!res.ok) {
+        throw new Error(`Failed to fetch suggestions: ${res.status} ${res.statusText}`);
     }
+
+    const data = await res.json();
+    return data.suggestions || [];
 }
 
 /**
